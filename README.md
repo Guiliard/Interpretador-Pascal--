@@ -9,7 +9,7 @@
 
 ## Interpretador Pascal--
 
-O Interpretador Pascal-- é uma aplicação educacional desenvolvida em Pascal que interpreta e executa programas escritos em uma versão reduzida da linguagem Pascal (Pascal Menos Menos). Essa versão simplificada possui fins didáticos, focando nos fundamentos da computação como interpretação de instruções, análise sintática e controle de fluxo.
+O Interpretador Pascal-- é uma aplicação desenvolvida em Pascal que interpreta e executa programas escritos em uma versão reduzida da linguagem Pascal (Pascal Menos Menos). Essa versão simplificada possui fins didáticos, focando nos fundamentos da computação como interpretação de instruções, análise sintática e controle de fluxo.
 
 ## Requisitos
 
