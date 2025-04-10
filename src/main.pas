@@ -1,8 +1,5 @@
 program main;
 
-uses
-  util; 
-
 begin
-  SayHello;
+  writeln('Hello, World!');
 end.
