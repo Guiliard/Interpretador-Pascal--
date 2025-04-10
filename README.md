@@ -21,12 +21,12 @@ O Interpretador Pascal-- é uma aplicação desenvolvida em Pascal que interpret
 
 1. **Clone o repositório:**
     ```bash
-    git clone https://github.com/Guiliard/Pascal--.git
+    git clone https://github.com/Guiliard/Interpretador-Pascal--.git
     ```
 
 2. **Acesse o repositório:**
     ```bash
-    cd Pascal--
+    cd Interpretador-Pascal--
     ```
 
 3. **Execute o seguinte comando:**
