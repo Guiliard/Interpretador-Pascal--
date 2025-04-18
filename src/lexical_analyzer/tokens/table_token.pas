@@ -12,7 +12,7 @@ type
     end;
 
 const 
-    tableToken: array[0..41] of table = (
+    tableToken: array[0..42] of table = (
 
         // Arithmetic operators
         (text: '+'; token: _ADD_),
@@ -27,6 +27,7 @@ const
         (text: 'and'; token: _AND_),
         (text: 'not'; token: _NOT_),
         (text: '='; token: _EQUAL_),
+        (text: '=='; token: _DOUBLE_EQUAL_),
         (text: '<>'; token: _NOT_EQUAL_),
         (text: '>'; token: _GREATER_),
         (text: '>='; token: _GREATER_EQUAL_),

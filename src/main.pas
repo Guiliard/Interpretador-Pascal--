@@ -1,5 +1,13 @@
 program main;
 
+uses
+  reader;
+
+var
+  fileContent: string;
+
 begin
-  writeln('Hello, World!');
+  fileContent := ReadFileToString;
+  Writeln('Conteúdo do arquivo:');
+  Writeln(fileContent);
 end.

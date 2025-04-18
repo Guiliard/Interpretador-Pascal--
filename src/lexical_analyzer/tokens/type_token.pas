@@ -17,7 +17,8 @@ type
         _OR_,               // or
         _AND_,              // and
         _NOT_,              // not
-        _EQUAL_,            // ==
+        _EQUAL_,            // =
+        _DOUBLE_EQUAL_,     // ==
         _NOT_EQUAL_,        // <>
         _GREATER_,          // >
         _GREATER_EQUAL_,    // >=
@@ -53,7 +54,15 @@ type
         _DOT_,              // .
         _COLON_,            // :
         _LEFT_PAREN_,       // (
-        _RIGHT_PAREN_       // )
+        _RIGHT_PAREN_,      // )
+
+        // Others
+        _VARIABLE_,         // variable
+        _NUMBER_,           // number
+        _STRING_LITERAL_,   // string literal
+        _UNEXPECTED_EOF_,   // unexpected end of file
+	    _INVALID_TOKEN_,    // invalid token
+	    _END_OF_FILE_       // end of file
     );
 
 implementation
