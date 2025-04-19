@@ -31,7 +31,7 @@ O Interpretador Pascal-- é uma aplicação desenvolvida em Pascal que interpret
 
 3. **Execute o seguinte comando:**
     ```bash
-    clear && make clean && make && make run
+    clear && make clean && make && make run test=test01
     ```
 
 4. **Vá até a pasta `output` para observar os resultados da simulação:**
