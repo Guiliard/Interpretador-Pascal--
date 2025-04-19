@@ -58,9 +58,11 @@ type
 
         // Others
         _VARIABLE_,         // variable
-        _NUMBER_,           // number
+        _HEXADECIMAL_,      // hexadecimal
+        _OCTAL_,            // octal
+        _DECIMAL_,          // decimal
+        _FLOAT_,            // float
         _STRING_LITERAL_,   // string literal
-        _UNEXPECTED_EOF_,   // unexpected end of file
 	    _INVALID_TOKEN_,    // invalid token
 	    _END_OF_FILE_       // end of file
     );

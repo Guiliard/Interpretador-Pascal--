@@ -1,9 +1,9 @@
 unit table_token;
 
+interface 
+
 uses
     type_token;
-
-interface 
 
 type 
     table = record
