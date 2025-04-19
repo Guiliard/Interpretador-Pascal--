@@ -1,0 +1,21 @@
+program ComplexTest;
+var
+    num1: integer;
+    num2: real = 12.5;
+    hex: integer = 0x1F3;
+    str: string = "Teste\nCom \'escape\'";
+begin
+    // Aritmética básica
+    num1 := (10 + 3) * 4 div 2 mod 5;
+    
+    { Estrutura condicional complexa com multiplas linhas }
+    if (num1 >= 15) and (num2 <= 20.7) then
+        writeln('Valor: ', num1)
+    else
+        write('Outro valor');
+    
+    // Loop com diferentes bases numéricas
+    for i := 01 to 0x0A do
+        if i <> 5 then
+            break;
+end.
