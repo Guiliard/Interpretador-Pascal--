@@ -8,7 +8,7 @@ uses
   utils;       
 
 var
-  fileContent: string;
+  fileContent: AnsiString;
   lexemes: array of lexeme;
   i: Integer;
 

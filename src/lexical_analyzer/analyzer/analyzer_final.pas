@@ -12,11 +12,11 @@ uses
 type 
     lexeme_array = array of lexeme;
 
-function analyzer(programPmm: string): lexeme_array;
+function analyzer(programPmm: AnsiString): lexeme_array;
 
 implementation
 
-function analyzer(programPmm: string): lexeme_array;
+function analyzer(programPmm: AnsiString): lexeme_array;
 
 var 
     textToken: string;

@@ -2,14 +2,14 @@ unit reader;
 
 interface
 
-function readFileToString: string;
+function readFileToString: AnsiString;
 
 implementation
 
-function readFileToString: string;
+function readFileToString: AnsiString;
 
 var
-  fileContent: string;
+  fileContent: AnsiString;
   line: string;
 
 begin 

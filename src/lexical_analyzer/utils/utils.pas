@@ -145,42 +145,47 @@ end;
 
 function IsFloat(s: string): boolean;
 var
-    dotPos, i: Integer;
-    hasDigitBefore, float: Boolean;
-
+    i, dotCount: Integer;
+    hasDigitBeforeDot, hasDigitAfterDot: Boolean;
 begin
-    float := False;
-    dotPos := Pos('.', s);
-    if (dotPos = 0) or (Pos('.', s, dotPos + 1) > 0) then 
+    dotCount := 0;
+    hasDigitBeforeDot := False;
+    hasDigitAfterDot := False;
+
+    // String precisa ter pelo menos um caractere
+    if Length(s) < 3 then
     begin
-        Exit;
-    end;
-    
-    if (dotPos = 1) then 
-    begin 
-        Exit; 
+        Exit(False);
     end;
 
-    hasDigitBefore := False;
-    for i := 1 to dotPos - 1 do
+    for i := 1 to Length(s) do
     begin
-        if not (s[i] in ['0'..'9']) then 
+        if s[i] = '.' then
         begin
-            Exit;
+            Inc(dotCount);
+            if dotCount > 1 then
+                Exit(False);
+        end
+        else if s[i] in ['0'..'9'] then
+        begin
+            if dotCount = 0 then
+                hasDigitBeforeDot := True
+            else
+                hasDigitAfterDot := True;
+        end
+        else
+        begin
+            Exit(False);
         end;
-    hasDigitBefore := True;
     end;
 
-    for i := dotPos + 1 to Length(s) do
-    begin 
-        if not (s[i] in ['0'..'9']) then 
-        begin 
-            Exit;
-        end;
-    end;
-    float := hasDigitBefore;
-    Exit(float);
+    // Float válido precisa ter exatamente um ponto e pelo menos um dígito antes e depois dele
+    if (dotCount = 1) and hasDigitBeforeDot and hasDigitAfterDot then
+        Exit(True)
+    else
+        Exit(False);
 end;
+
 
 function getTokenName(token: typeToken): string;
 begin
