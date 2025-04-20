@@ -152,7 +152,6 @@ begin
     hasDigitBeforeDot := False;
     hasDigitAfterDot := False;
 
-    // String precisa ter pelo menos um caractere
     if Length(s) < 3 then
     begin
         Exit(False);
@@ -179,7 +178,6 @@ begin
         end;
     end;
 
-    // Float válido precisa ter exatamente um ponto e pelo menos um dígito antes e depois dele
     if (dotCount = 1) and hasDigitBeforeDot and hasDigitAfterDot then
         Exit(True)
     else
