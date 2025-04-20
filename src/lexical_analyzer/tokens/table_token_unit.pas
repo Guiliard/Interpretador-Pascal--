@@ -1,9 +1,9 @@
-unit table_token;
+unit table_token_unit;
 
 interface 
 
 uses
-    type_token;
+    type_token_unit;
 
 type 
     table = record

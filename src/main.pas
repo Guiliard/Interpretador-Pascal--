@@ -1,11 +1,11 @@
 program main;
 
 uses
-  reader,      
-  analyzer_final,    
-  lexeme_final,    
-  type_token,  
-  utils;       
+  reader_unit,      
+  analyzer_unit,    
+  lexeme_unit,    
+  type_token_unit,  
+  utils_unit;       
 
 var
   fileContent: AnsiString;

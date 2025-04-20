@@ -1,10 +1,10 @@
-unit utils;
+unit utils_unit;
 
 interface
 
 uses
-    type_token,
-    table_token;
+    type_token_unit,
+    table_token_unit;
 
 function matchToken(textToken: string; finalVar: boolean): typeToken;
 function isAlpha(c: char): boolean;
