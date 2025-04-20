@@ -1,0 +1,14 @@
+program HelloWorld;
+var
+    x, y: integer;
+    s: string;
+begin
+    x := 10;
+    y := 0x1F;
+    s := "Olá, mundo!";
+    if x > y then
+        writeln("X é maior que Y");
+    // Comentário de uma linha
+    { Comentário de
+      múltiplas linhas }
+end.

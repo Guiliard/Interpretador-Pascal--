@@ -1,0 +1,34 @@
+program ComplexTest;
+var
+    num1: integer;
+    num2: real;
+    hexa: integer;
+    str: string;
+begin
+    // Aritmética básica
+    num1 := (10 + 3) * 4 div 2 mod 5;
+    num2 := 12.5;
+    hexa := 0x1F3;
+    str  := "String";
+    
+    { Estrutura condicional complexa 
+    com multiplas linhas }
+
+    if (num1 >= 15) and (num2 <= 20.7) then
+    begin
+        writeln("Valor: ", num1)
+    end
+    else
+    begin
+        write("Outro valor");
+    end;
+    
+    // Loop com diferentes bases numéricas
+    for i := 01 to 0x0A do
+    begin
+        if i <> 5 then
+        begin
+            break;
+        end;
+    end;
+end.
