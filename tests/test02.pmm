@@ -8,7 +8,7 @@ begin
     // Aritmética básica
     num1 := (10 + 3) * 4 div 2 mod 5;
     num2 := 12.5;
-    hexa := 0X1F3;
+    hexa := X1F3;
     str  := "String";
     
     { Estrutura condicional complexa 

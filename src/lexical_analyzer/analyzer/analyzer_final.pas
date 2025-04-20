@@ -1,3 +1,4 @@
+{$H+}
 unit analyzer_final;
 
 interface
@@ -19,7 +20,7 @@ implementation
 function analyzer(programPmm: AnsiString): lexeme_array;
 
 var 
-    textToken: string;
+    textToken: AnsiString;
     currentLexeme: lexeme;
     currentLine: integer;
     currentColumn: integer;
