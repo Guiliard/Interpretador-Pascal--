@@ -29,14 +29,9 @@ O Interpretador Pascal-- é uma aplicação desenvolvida em Pascal que interpret
     cd Interpretador-Pascal--
     ```
 
-3. **Execute o seguinte comando:**
+3. **Execute o seguinte comando com o teste desejado:**
     ```bash
     clear && make clean && make && make run test=test01
-    ```
-
-4. **Vá até a pasta `output` para observar os resultados da simulação:**
-    ```bash
-    cd output
     ```
 
 ## Especificações do Dispositivo Utilizado
