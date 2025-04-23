@@ -180,20 +180,8 @@ begin
                 end
 
                 else 
-                if (programPmm[i] <> '=') and (programPmm[i] <> '>') then
                 begin 
                     state := states._FINAL_VAR_;
-                end
-
-                else 
-                if (textToken <> '<') and (programPmm[i] = '>') then
-                begin
-                    textToken := textToken + programPmm[i];
-                    currentLexeme := createLexeme(textToken, type_token_unit._INVALID_TOKEN_, currentLine, currentColumn);
-                    setLength(lexemeList, length(lexemeList) + 1);
-                    lexemeList[length(lexemeList) - 1] := currentLexeme;
-                    writeln('Error: Unexpected character at line ', currentLine, ', column ', currentColumn, ' The token ', textToken, 'is not valid.');
-                    state := states._ERROR_;
                 end;
             end;
 
@@ -268,7 +256,7 @@ begin
                 lexemeList[length(lexemeList) - 1] := currentLexeme;
                 if (matchToken(textToken, False) = type_token_unit._INVALID_TOKEN_) then
                 begin
-                    writeln('Error: Unexpected character at line ', currentLine, ', column ', currentColumn, ' The token ', textToken, 'is not valid.');
+                    writeln('Error: Unexpected character at line ', currentLine, ', column ', currentColumn, ' The number ', textToken, ' is not valid.');
                     state := states._ERROR_;
                 end
                 else 
