@@ -39,6 +39,7 @@ O Interpretador Pascal-- é uma aplicação desenvolvida em Pascal que interpret
 ## Execução do Projeto
 
 1. **Execute o seguinte comando com o teste desejado:**
+   
     ```bash
     clear && make clean && make && make run test=test01
     ```
