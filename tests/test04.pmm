@@ -1,0 +1,7 @@
+program ErrorTest;
+var
+    num: real;
+begin
+    // Error
+    num := 1.2.;
+end.
