@@ -19,6 +19,10 @@ implementation
 
 function analyzer(programPmm: AnsiString): lexeme_array;
 
+const
+    finalVarset: set of char = ['+', '-', '*', '/', ';', ',', '.', ':', '(', ')'];
+    logicSymbolset: set of char = ['=', '<', '>', ':'];
+
 var 
     textToken: AnsiString;
     currentLexeme: lexeme;
@@ -81,7 +85,7 @@ begin
                 end
 
                 else 
-                if (programPmm[i] in ['=', '<', '>', ':']) then
+                if (programPmm[i] in logicSymbolset) then
                 begin
                     textToken := textToken + programPmm[i];
                     currentColumn := i - difference;
@@ -90,7 +94,7 @@ begin
                 end
 
                 else 
-                if (programPmm[i] in ['+', '-', '*', '/', ';', ',', '.', ':', '(', ')']) then
+                if (programPmm[i] in finalVarset) then
                 begin
                     textToken := textToken + programPmm[i];
                     currentColumn := i - difference;
