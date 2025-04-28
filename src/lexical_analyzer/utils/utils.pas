@@ -200,8 +200,7 @@ begin
         _OR_: getTokenName := 'OR (or)';
         _AND_: getTokenName := 'AND (and)';
         _NOT_: getTokenName := 'NOT (not)';
-        _EQUAL_: getTokenName := 'EQUAL (=)';
-        _DOUBLE_EQUAL_: getTokenName := 'DOUBLE_EQUAL (==)';
+        _EQUAL_: getTokenName := 'EQUAL (= || ==)';
         _NOT_EQUAL_: getTokenName := 'NOT_EQUAL (<>)';
         _GREATER_: getTokenName := 'GREATER (>)';
         _GREATER_EQUAL_: getTokenName := 'GREATER_EQUAL (>=)';
