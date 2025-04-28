@@ -1,9 +1,9 @@
-unit lexeme_final;
+unit lexeme_unit;
 
 interface
 
 uses
-    type_token;
+    type_token_unit;
 
 type 
     lexeme = record

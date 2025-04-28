@@ -1,11 +1,11 @@
 program main;
 
 uses
-  reader,      
-  analyzer_final,    
-  lexeme_final,    
-  type_token,  
-  utils;       
+  reader_unit,      
+  analyzer_unit,    
+  lexeme_unit,    
+  type_token_unit,  
+  utils_unit;       
 
 var
   fileContent: AnsiString;
@@ -14,12 +14,10 @@ var
 
 begin
   fileContent := ReadFileToString;
-  Writeln('Conteúdo do arquivo:');
+  Writeln('--- Conteúdo do arquivo ---');
   Writeln(fileContent);
   
-  Writeln('Analisando o conteúdo do arquivo...');
   lexemes := analyzer(fileContent);
-  Writeln('Análise concluída.');
 
   Writeln('--- Lista de lexemas ---');
   for i := 0 to High(lexemes) do

@@ -7,15 +7,22 @@
 </div>
 <br>
 
+## Sumário
+
+- [Interpretador Pascal--](#interpretador-pascal--)
+- [Pré-requisitos](#pré-requisitos)
+- [Instalação](#instalação)
+- [Execução do Projeto](#execução-do-projeto)
+
 ## Interpretador Pascal--
 
 O Interpretador Pascal-- é uma aplicação desenvolvida em Pascal que interpreta e executa programas escritos em uma versão reduzida da linguagem Pascal (Pascal Menos Menos). Essa versão simplificada possui fins didáticos, focando nos fundamentos da computação como interpretação de instruções, análise sintática e controle de fluxo.
 
-## Requisitos
+## Pré-requisitos
 
 - Free Pascal Compiler (FPC) >= 3.2.0
 - Linux ou WSL (Windows Subsystem for Linux)
-- Make >= 4.0
+- GNU Make >= 4.0
 
 ## Instalação
 
@@ -29,14 +36,12 @@ O Interpretador Pascal-- é uma aplicação desenvolvida em Pascal que interpret
     cd Interpretador-Pascal--
     ```
 
-3. **Execute o seguinte comando:**
+## Execução do Projeto
+
+1. **Execute o seguinte comando com o teste desejado:**
+   
     ```bash
     clear && make clean && make && make run test=test01
-    ```
-
-4. **Vá até a pasta `output` para observar os resultados da simulação:**
-    ```bash
-    cd output
     ```
 
 ## Especificações do Dispositivo Utilizado
@@ -51,3 +56,5 @@ O Interpretador Pascal-- é uma aplicação desenvolvida em Pascal que interpret
 ## Referências
 
 [1] PASCAL - PASCAL Documentation. Disponível em: <https://www.freepascal.org/docs.var>. Acessado em: 8 de Abril de 2025.
+
+[2] RIMSA, ANDREI - Repositório GitHub, @rimsa: tiny - Disponível em: https://github.com/rimsa/tiny. Acessado em 14 de Abril de 2025.

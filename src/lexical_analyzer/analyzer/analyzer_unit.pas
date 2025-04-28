@@ -1,14 +1,13 @@
-{$H+}
-unit analyzer_final;
+unit analyzer_unit;
 
 interface
 
 uses
-    lexeme_final, 
-    table_token,
-    type_token,
-    states_final,
-    utils;
+    lexeme_unit, 
+    table_token_unit,
+    type_token_unit,
+    states_unit,
+    utils_unit;
 
 type 
     lexeme_array = array of lexeme;
@@ -52,21 +51,21 @@ begin
             begin
                 if (i = lengthProgram) then
                 begin
-                    currentLexeme := createLexeme('', type_token._END_OF_FILE_, currentLine, currentColumn);
+                    currentLexeme := createLexeme('', type_token_unit._END_OF_FILE_, currentLine, currentColumn);
                     setLength(lexemeList, length(lexemeList) + 1);
                     lexemeList[length(lexemeList) - 1] := currentLexeme;
                     break;
                 end
 
                 else 
-                if (programPmm[i] = '\t') or (programPmm[i] = '\r') or (programPmm[i] = LineEnding) or (programPmm[i] = ' ') then
+                if programPmm[i] in [' ', #9, #13, LineEnding] then
                 begin
-                    if (programPmm[i] = LineEnding) then
+                    if programPmm[i] = LineEnding then
                     begin
                         difference := i;
-                        inc(currentLine);
+                        Inc(currentLine);
                     end;
-                    inc(i);
+                    Inc(i);
                     state := states._INITIAL_;
                 end
 
@@ -185,20 +184,8 @@ begin
                 end
 
                 else 
-                if (programPmm[i] <> '=') and (programPmm[i] <> '>') then
                 begin 
                     state := states._FINAL_VAR_;
-                end
-
-                else 
-                if (textToken <> '<') and (programPmm[i] = '>') then
-                begin
-                    textToken := textToken + programPmm[i];
-                    currentLexeme := createLexeme(textToken, type_token._INVALID_TOKEN_, currentLine, currentColumn);
-                    setLength(lexemeList, length(lexemeList) + 1);
-                    lexemeList[length(lexemeList) - 1] := currentLexeme;
-                    writeln('Error: Unexpected character at line ', currentLine, ', column ', currentColumn, ' The token ', textToken, 'is not valid.');
-                    state := states._ERROR_;
                 end;
             end;
 
@@ -271,9 +258,9 @@ begin
                 currentLexeme := createLexeme(textToken, matchToken(textToken, False), currentLine, currentColumn);
                 setLength(lexemeList, length(lexemeList) + 1);
                 lexemeList[length(lexemeList) - 1] := currentLexeme;
-                if (matchToken(textToken, False) = type_token._INVALID_TOKEN_) then
+                if (matchToken(textToken, False) = type_token_unit._INVALID_TOKEN_) then
                 begin
-                    writeln('Error: Unexpected character at line ', currentLine, ', column ', currentColumn, ' The token ', textToken, 'is not valid.');
+                    writeln('Error: Unexpected character at line ', currentLine, ', column ', currentColumn, ' The number ', textToken, ' is not valid.');
                     state := states._ERROR_;
                 end
                 else 
@@ -285,7 +272,7 @@ begin
 
             states._FINAL_STRING_:
             begin
-                currentLexeme := createLexeme(textToken, type_token._STRING_LITERAL_, currentLine, currentColumn);
+                currentLexeme := createLexeme(textToken, type_token_unit._STRING_LITERAL_, currentLine, currentColumn);
                 setLength(lexemeList, length(lexemeList) + 1);
                 lexemeList[length(lexemeList) - 1] := currentLexeme;
                 textToken := '';
