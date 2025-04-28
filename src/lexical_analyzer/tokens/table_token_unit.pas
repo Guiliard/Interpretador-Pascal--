@@ -27,7 +27,7 @@ const
         (text: 'and'; token: _AND_),
         (text: 'not'; token: _NOT_),
         (text: '='; token: _EQUAL_),
-        (text: '=='; token: _DOUBLE_EQUAL_),
+        (text: '=='; token: _EQUAL_),
         (text: '<>'; token: _NOT_EQUAL_),
         (text: '>'; token: _GREATER_),
         (text: '>='; token: _GREATER_EQUAL_),

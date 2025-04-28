@@ -14,7 +14,7 @@ begin
     { Estrutura condicional complexa 
     com multiplas linhas }
 
-    if (num1 >= 15) and (num2 <= 20.7) then
+    if (num1 == 15) and (num2 <= 20.7) then
     begin
         writeln("Valor: ", num1)
     end

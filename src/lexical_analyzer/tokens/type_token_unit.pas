@@ -17,8 +17,7 @@ type
         _OR_,               // or
         _AND_,              // and
         _NOT_,              // not
-        _EQUAL_,            // =
-        _DOUBLE_EQUAL_,     // ==
+        _EQUAL_,            // =, ==
         _NOT_EQUAL_,        // <>
         _GREATER_,          // >
         _GREATER_EQUAL_,    // >=
