@@ -143,7 +143,14 @@ begin
             end;
 
             states._BLOCK_COMMENT_:
-            begin 
+            begin
+                if (i = lengthProgram) then
+                begin
+                    writeln('Error: Unexpected end of file at line ', currentLine, ', column ', currentColumn, ' The block comment is not closed.');
+                    state := states._ERROR_;
+                end 
+
+                else 
                 if (programPmm[i] <> '}') then
                 begin
                     if (programPmm[i] = LineEnding) then
@@ -160,13 +167,6 @@ begin
                 begin 
                     inc(i);
                     state := states._INITIAL_;
-                end
-
-                else 
-                if (i = lengthProgram) then
-                begin
-                    writeln('Error: Unexpected end of file at line ', currentLine, ', column ', currentColumn, ' The block comment is not closed.');
-                    state := states._ERROR_;
                 end;
             end;
 
@@ -217,26 +217,26 @@ begin
 
             states._STRING_:
             begin
+                if (i = lengthProgram) then
+                begin
+                    writeln('Error: Unexpected end of file at line ', currentLine, ', column ', currentColumn, ' The string is not closed.');
+                    state := states._ERROR_;
+                end
+
+                else 
                 if (programPmm[i] <> '"') then
                 begin
                     textToken := textToken + programPmm[i];
                     inc(i);
                     state := states._STRING_;
                 end
-
+                
                 else 
                 if (programPmm[i] = '"') then
                 begin
                     textToken := textToken + programPmm[i];
                     inc(i);
                     state := states._FINAL_STRING_;
-                end
-
-                else 
-                if (i = lengthProgram) then
-                begin
-                    writeln('Error: Unexpected end of file at line ', currentLine, ', column ', currentColumn, ' The string is not closed.');
-                    state := states._ERROR_;
                 end;
             end;
 
