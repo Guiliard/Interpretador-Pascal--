@@ -21,6 +21,8 @@ function analyzer(programPmm: AnsiString): lexeme_array;
 const
     finalVarset: set of char = ['+', '-', '*', '/', ';', ',', '.', ':', '(', ')'];
     logicSymbolset: set of char = ['=', '<', '>', ':'];
+    initalset: set of char = [' ', #9, #13, #10];
+    numericset: set of char = ['0'..'9', 'A'..'F', 'a'..'f', 'x', '.'];
 
 var 
     textToken: AnsiString;
@@ -58,9 +60,9 @@ begin
                 end
 
                 else 
-                if programPmm[i] in [' ', #9, #13, LineEnding] then
+                if (programPmm[i] in initalset) then
                 begin
-                    if programPmm[i] = LineEnding then
+                    if programPmm[i] = #10 then
                     begin
                         difference := i;
                         Inc(currentLine);
@@ -131,7 +133,7 @@ begin
 
             states._SIMPLE_COMMENT_:
             begin
-                if (programPmm[i] <> LineEnding) then
+                if (programPmm[i] <> #10) then
                 begin
                     inc(i);
                     state := states._SIMPLE_COMMENT_;
@@ -150,14 +152,14 @@ begin
             begin
                 if (i = lengthProgram) then
                 begin
-                    writeln('Error: Unexpected end of file at line ', currentLine, ', column ', currentColumn, ' The block comment is not closed.');
+                    writeln('Error: Unexpected end of file at line ', currentLine, ', column ', currentColumn, ' The block comment is not closed.', #10);
                     state := states._ERROR_;
                 end 
 
                 else 
                 if (programPmm[i] <> '}') then
                 begin
-                    if (programPmm[i] = LineEnding) then
+                    if (programPmm[i] = #10) then
                     begin
                         inc(currentLine);
                         difference := i;
@@ -191,7 +193,7 @@ begin
 
             states._ALPHABETIC_:
             begin
-                if isAlpha(programPmm[i]) or isDigit(programPmm[i]) then
+                if (isAlpha(programPmm[i]) or isDigit(programPmm[i])) then
                 begin
                     textToken := textToken + programPmm[i];
                     inc(i);
@@ -206,7 +208,7 @@ begin
 
             states._NUMERIC_:
             begin
-                if (programPmm[i] in ['0'..'9', 'A'..'F', 'a'..'f', 'x', '.']) then
+                if (programPmm[i] in numericset) then
                 begin
                     textToken := textToken + programPmm[i];
                     inc(i);
@@ -223,7 +225,7 @@ begin
             begin
                 if (i = lengthProgram) then
                 begin
-                    writeln('Error: Unexpected end of file at line ', currentLine, ', column ', currentColumn, ' The string is not closed.');
+                    writeln('Error: Unexpected end of file at line ', currentLine, ', column ', currentColumn, ' The string is not closed.', #10);
                     state := states._ERROR_;
                 end
 
@@ -260,7 +262,7 @@ begin
                 lexemeList[length(lexemeList) - 1] := currentLexeme;
                 if (matchToken(textToken, False) = type_token_unit._INVALID_TOKEN_) then
                 begin
-                    writeln('Error: Unexpected character at line ', currentLine, ', column ', currentColumn, ' The number ', textToken, ' is not valid.');
+                    writeln('Error: Unexpected character at line ', currentLine, ', column ', currentColumn, ' The number ', textToken, ' is not valid.', #10);
                     state := states._ERROR_;
                 end
                 else 
