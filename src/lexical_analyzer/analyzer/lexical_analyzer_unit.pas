@@ -1,4 +1,4 @@
-unit analyzer_unit;
+unit lexical_analyzer_unit;
 
 interface
 
@@ -7,16 +7,16 @@ uses
     table_token_unit,
     type_token_unit,
     states_unit,
-    utils_unit;
+    lexical_utils_unit;
 
 type 
     lexeme_array = array of lexeme;
 
-function analyzer(programPmm: AnsiString): lexeme_array;
+function lexical_analyzer(programPmm: AnsiString): lexeme_array;
 
 implementation
 
-function analyzer(programPmm: AnsiString): lexeme_array;
+function lexical_analyzer(programPmm: AnsiString): lexeme_array;
 
 const
     finalVarset: set of char = ['+', '-', '*', '/', ';', ',', '.', ':', '(', ')'];

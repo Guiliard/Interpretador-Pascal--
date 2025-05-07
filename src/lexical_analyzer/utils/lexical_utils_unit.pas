@@ -1,4 +1,4 @@
-unit utils_unit;
+unit lexical_utils_unit;
 
 interface
 

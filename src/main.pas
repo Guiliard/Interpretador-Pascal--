@@ -2,10 +2,9 @@ program main;
 
 uses
   reader_unit,      
-  analyzer_unit,    
+  lexical_analyzer_unit,    
   lexeme_unit,    
-  type_token_unit,  
-  utils_unit;       
+  lexical_utils_unit;       
 
 var
   fileContent: AnsiString;
@@ -17,7 +16,7 @@ begin
   Writeln('--- Conteúdo do arquivo ---');
   Writeln(fileContent);
   
-  lexemes := analyzer(fileContent);
+  lexemes := lexical_analyzer(fileContent);
 
   Writeln('--- Lista de lexemas ---');
   for i := 0 to High(lexemes) do
