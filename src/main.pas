@@ -16,7 +16,7 @@ begin
   Writeln('--- Conteúdo do arquivo ---');
   Writeln(fileContent);
   
-  lexemes := lexical_analyzer(fileContent);
+  lexemes := lexicalAnalyzer(fileContent);
 
   Writeln('--- Lista de lexemas ---');
   for i := 0 to High(lexemes) do

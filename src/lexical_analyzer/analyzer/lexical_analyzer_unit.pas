@@ -9,11 +9,11 @@ uses
     states_unit,
     lexical_utils_unit;
 
-function lexical_analyzer(programPmm: AnsiString): lexeme_array;
+function lexicalAnalyzer(programPmm: AnsiString): lexeme_array;
 
 implementation
 
-function lexical_analyzer(programPmm: AnsiString): lexeme_array;
+function lexicalAnalyzer(programPmm: AnsiString): lexeme_array;
 
 const
     finalVarset: set of char = ['+', '-', '*', '/', ';', ',', '.', ':', '(', ')'];
