@@ -9,9 +9,6 @@ uses
     states_unit,
     lexical_utils_unit;
 
-type 
-    lexeme_array = array of lexeme;
-
 function lexical_analyzer(programPmm: AnsiString): lexeme_array;
 
 implementation

@@ -13,6 +13,8 @@ type
         column: integer;
     end;
 
+    lexeme_array = array of lexeme;
+
 function createLexeme(lex_text: string; token_real: typeToken; line, column: integer): lexeme;
 
 implementation
