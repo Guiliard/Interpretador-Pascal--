@@ -31,31 +31,37 @@ begin
             Exit(match);
         end;
     end;
+
     if finalVar then
     begin
         Exit(_VARIABLE_);
     end
+
     else 
     begin
         if (isOctal(textToken)) then
         begin
             Exit(_OCTAL_);
         end
+
         else 
         if (isDecimal(textToken)) then
         begin
             Exit(_DECIMAL_);
         end
+
         else 
         if (isHexadecimal(textToken)) then
         begin
             Exit(_HEXADECIMAL_);
         end
+
         else 
         if (isFloat(textToken)) then
         begin
             Exit(_FLOAT_);
         end
+        
         else 
         begin
             Exit(_INVALID_TOKEN_);
