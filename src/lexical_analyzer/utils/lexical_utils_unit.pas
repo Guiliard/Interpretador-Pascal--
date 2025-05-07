@@ -127,6 +127,7 @@ function IsHexadecimal(s: string): boolean;
 var
     i: Integer;
     hexadecimal: boolean;
+
 begin
     hexadecimal := False;
     if (Length(s) < 3) or (s[1] <> '0') or (s[2] <> 'x') then 
@@ -147,6 +148,7 @@ function IsFloat(s: string): boolean;
 var
     i, dotCount: Integer;
     hasDigitBeforeDot, hasDigitAfterDot: Boolean;
+
 begin
     dotCount := 0;
     hasDigitBeforeDot := False;
