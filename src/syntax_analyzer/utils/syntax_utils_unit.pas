@@ -6,15 +6,13 @@ uses
     type_token_unit,
     lexeme_unit;
 
-procedure advanceToken(lexemes: lexeme_array; var i: integer);
 procedure eatToken(lexemes: lexeme_array; var i: integer; token: typeToken);
-procedure showError(currentLexeme: lexeme);
 
 implementation
 
 procedure advanceToken(lexemes: lexeme_array; var i: integer);
 begin 
-    if (i < High(lexemes)) then
+    if (i <= High(lexemes)) then
     begin
         Inc(i);
     end;
@@ -22,7 +20,7 @@ end;
 
 procedure eatToken(lexemes: lexeme_array; var i: integer; token: typeToken);
 begin 
-    if (token <> lexemes[i].token_real) then
+    if (lexemes[i].token_real <> token) then
     begin 
         showError(lexemes[i]);
         Halt(1);

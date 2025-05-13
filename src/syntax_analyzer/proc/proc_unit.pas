@@ -8,38 +8,6 @@ uses
     type_token_unit;
 
 procedure procMain(lexemes: lexeme_array; var i: integer);
-procedure procDeclarations(lexemes: lexeme_array; var i: integer); 
-procedure procStmtList(lexemes: lexeme_array; var i: integer);
-procedure procDeclaration(lexemes: lexeme_array; var i: integer);
-procedure procRestDeclaration(lexemes: lexeme_array; var i: integer);
-procedure procListIdent(lexemes: lexeme_array; var i: integer);
-procedure procType(lexemes: lexeme_array; var i: integer);
-procedure procRestListIdent(lexemes: lexeme_array; var i: integer);
-procedure procStmt(lexemes: lexeme_array; var i: integer);
-procedure procForStmt(lexemes: lexeme_array; var i: integer);
-procedure procIoStmt(lexemes: lexeme_array; var i: integer);
-procedure procWhileStmt(lexemes: lexeme_array; var i: integer);
-procedure procAtrib(lexemes: lexeme_array; var i: integer);
-procedure procIfStmt(lexemes: lexeme_array; var i: integer);
-procedure procEndFor(lexemes: lexeme_array; var i: integer);
-procedure procOutList(lexemes: lexeme_array; var i: integer);
-procedure procOut(lexemes: lexeme_array; var i: integer);
-procedure procRestOutList(lexemes: lexeme_array; var i: integer);
-procedure procExpr(lexemes: lexeme_array; var i: integer);
-procedure procElsePart(lexemes: lexeme_array; var i: integer);
-procedure procOr(lexemes: lexeme_array; var i: integer);
-procedure procAnd(lexemes: lexeme_array; var i: integer);
-procedure procRestOr(lexemes: lexeme_array; var i: integer);
-procedure procNot(lexemes: lexeme_array; var i: integer);
-procedure procRestAnd(lexemes: lexeme_array; var i: integer);
-procedure procRel(lexemes: lexeme_array; var i: integer);
-procedure procAdd(lexemes: lexeme_array; var i: integer);
-procedure procRestRel(lexemes: lexeme_array; var i: integer);
-procedure procMult(lexemes: lexeme_array; var i: integer);
-procedure procRestAdd(lexemes: lexeme_array; var i: integer);
-procedure procUno(lexemes: lexeme_array; var i: integer);
-procedure procRestMult(lexemes: lexeme_array; var i: integer);
-procedure procFactor(lexemes: lexeme_array; var i: integer);
 
 implementation
 
@@ -116,7 +84,7 @@ end;
 procedure procStmtList(lexemes: lexeme_array; var i: integer);
 const
     stmtSet: set of typeToken = [_FOR_, _READ_, _WRITE_, _READLN_, _WRITELN_,
-    _WHILE_,  _VARIABLE_, _IF_, _BEGIN_, _BREAK_, _CONTINUE_, _SEMICOLON_];
+    _WHILE_,  _VARIABLE_, _IF_, _BEGIN_, _BREAK_, _CONTINUE_, _SEMICOLON_, _END_];
 begin
     if lexemes[i].token_real in stmtSet then
     begin
@@ -131,38 +99,54 @@ begin
     begin
         procForStmt(lexemes, i);
     end
-    else if lexemes[i].token_real in [type_token_unit._READ_, type_token_unit._WRITE_, type_token_unit._READLN_, type_token_unit._WRITELN_] then
+
+    else 
+    if lexemes[i].token_real in [type_token_unit._READ_, type_token_unit._WRITE_, type_token_unit._READLN_, type_token_unit._WRITELN_] then
     begin
         procIoStmt(lexemes, i);
     end
-    else if lexemes[i].token_real = type_token_unit._WHILE_ then
+
+    else 
+    if lexemes[i].token_real = type_token_unit._WHILE_ then
     begin
         procWhileStmt(lexemes, i);
     end
-    else if lexemes[i].token_real = type_token_unit._VARIABLE_ then
+
+    else 
+    if lexemes[i].token_real = type_token_unit._VARIABLE_ then
     begin
         procAtrib(lexemes, i);
         eatToken(lexemes, i, type_token_unit._SEMICOLON_);
     end
-    else if lexemes[i].token_real = type_token_unit._IF_ then
+
+    else 
+    if lexemes[i].token_real = type_token_unit._IF_ then
     begin
         procIfStmt(lexemes, i);
     end
-    else if lexemes[i].token_real = type_token_unit._BEGIN_ then
+
+    else 
+    if lexemes[i].token_real = type_token_unit._BEGIN_ then
     begin
         procBlock(lexemes, i);
     end
-    else if lexemes[i].token_real = type_token_unit._BREAK_ then
+
+    else 
+    if lexemes[i].token_real = type_token_unit._BREAK_ then
     begin
         eatToken(lexemes, i, type_token_unit._BREAK_);
         eatToken(lexemes, i, type_token_unit._SEMICOLON_);
     end
-    else if lexemes[i].token_real = type_token_unit._CONTINUE_ then
+
+    else 
+    if lexemes[i].token_real = type_token_unit._CONTINUE_ then
     begin
         eatToken(lexemes, i, type_token_unit._CONTINUE_);
         eatToken(lexemes, i, type_token_unit._SEMICOLON_);
     end
-    else if lexemes[i].token_real = type_token_unit._SEMICOLON_ then
+
+    else 
+    if lexemes[i].token_real = type_token_unit._SEMICOLON_ then
     begin
         eatToken(lexemes, i, type_token_unit._SEMICOLON_);
     end;
@@ -432,7 +416,7 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._LEFT_PAREN_);
         procExpr(lexemes, i);
-        eatToken(lexemes, i, lexemes[i].token_real);
+        eatToken(lexemes, i, type_token_unit._RIGHT_PAREN_);
     end
     else
     if lexemes[i].token_real in [type_token_unit._STRING_LITERAL_, type_token_unit._VARIABLE_, type_token_unit._DECIMAL_, type_token_unit._FLOAT_] then
