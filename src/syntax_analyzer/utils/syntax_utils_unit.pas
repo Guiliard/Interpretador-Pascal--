@@ -24,7 +24,7 @@ procedure eatToken(lexemes: lexeme_array; var i: integer; token: typeToken);
 begin 
     if (lexemes[i].token_real <> token) then
     begin 
-        showError(lexemes[i]);
+        showErrorSyntax(lexemes[i]);
         Halt(1);
     end;
     advanceToken(lexemes, i)
