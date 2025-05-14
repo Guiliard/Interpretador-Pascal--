@@ -110,13 +110,14 @@ begin
     eatToken(lexemes, i, type_token_unit._BEGIN_);
     procStmtList(lexemes, i);
     eatToken(lexemes, i, type_token_unit._END_);
-    eatToken(lexemes, i, type_token_unit._SEMICOLON_);
+    if (lexemes[i].token_real <> type_token_unit._ELSE_) then
+        eatToken(lexemes, i, type_token_unit._SEMICOLON_);
 end;
 
 procedure procStmtList(lexemes: lexeme_array; var i: integer);
 const
     stmtSet: set of typeToken = [_FOR_, _READ_, _WRITE_, _READLN_, _WRITELN_,
-    _WHILE_,  _VARIABLE_, _IF_, _BEGIN_, _BREAK_, _CONTINUE_, _SEMICOLON_];
+    _WHILE_, _VARIABLE_, _IF_, _BEGIN_, _BREAK_, _CONTINUE_, _SEMICOLON_];
 begin
     if lexemes[i].token_real in stmtSet then
     begin
@@ -196,7 +197,8 @@ end;
 
 procedure procEndFor(lexemes: lexeme_array; var i: integer);
 begin
-    if lexemes[i].token_real in [type_token_unit._VARIABLE_, type_token_unit._DECIMAL_] then
+    if lexemes[i].token_real in [type_token_unit._VARIABLE_, type_token_unit._DECIMAL_,
+    type_token_unit._HEXADECIMAL_, type_token_unit._OCTAL_] then
     begin
         eatToken(lexemes, i, lexemes[i].token_real);
     end;
@@ -443,6 +445,8 @@ begin
 end;
 
 procedure procFactor(lexemes: lexeme_array; var i: integer);
+const
+    factorSet: set of typeToken = [_STRING_LITERAL_, _VARIABLE_, _DECIMAL_, _FLOAT_, _HEXADECIMAL_, _OCTAL_];
 begin
     if lexemes[i].token_real = type_token_unit._LEFT_PAREN_ then
     begin
@@ -451,7 +455,7 @@ begin
         eatToken(lexemes, i, type_token_unit._RIGHT_PAREN_);
     end
     else
-    if lexemes[i].token_real in [type_token_unit._STRING_LITERAL_, type_token_unit._VARIABLE_, type_token_unit._DECIMAL_, type_token_unit._FLOAT_] then
+    if lexemes[i].token_real in factorSet then
     begin
         eatToken(lexemes, i, lexemes[i].token_real);
     end;

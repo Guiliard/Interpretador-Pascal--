@@ -16,7 +16,7 @@ begin
 
     if (num1 == 15) and (num2 <= 20.7) then
     begin
-        writeln("Valor: ", num1)
+        writeln("Valor: ", num1);
     end
     else
     begin

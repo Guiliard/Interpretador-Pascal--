@@ -7,7 +7,7 @@ uses
     lexeme_unit;
 
 procedure advanceToken(lexemes: lexeme_array; var i: integer);
-procedure showErrorSyntax(currentLexeme: lexeme);
+procedure showErrorSyntax(currentLexeme: lexeme; token: typeToken);
 procedure eatToken(lexemes: lexeme_array; var i: integer; token: typeToken);
 
 implementation
@@ -24,15 +24,16 @@ procedure eatToken(lexemes: lexeme_array; var i: integer; token: typeToken);
 begin 
     if (lexemes[i].token_real <> token) then
     begin 
-        showErrorSyntax(lexemes[i]);
+        showErrorSyntax(lexemes[i], token);
         Halt(1);
     end;
     advanceToken(lexemes, i)
 end;
 
-procedure showErrorSyntax(currentLexeme: lexeme);
+procedure showErrorSyntax(currentLexeme: lexeme; token: typeToken);
 begin 
-    writeln(#10, 'Syntax Error: Unexpected token at line ', currentLexeme.line, ', column ', currentLexeme.column, '. The token: "', currentLexeme.lex_text, '" is not appropriate.', #10);
+    writeln(#10, 'Syntax Error: Unexpected token at line ', currentLexeme.line, ', column ', currentLexeme.column, '. The token: "', currentLexeme.lex_text, '" is not appropriate.');
+    writeln('The token: "', currentLexeme.lex_text, '" is a ', currentLexeme.token_real, ' type.', ' It should be a ', token, ' type.', #10);
 end;
 
 end.
