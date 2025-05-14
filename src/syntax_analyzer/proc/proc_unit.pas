@@ -8,6 +8,38 @@ uses
     type_token_unit;
 
 procedure procMain(lexemes: lexeme_array; var i: integer);
+procedure procDeclarations(lexemes: lexeme_array; var i: integer); 
+procedure procStmtList(lexemes: lexeme_array; var i: integer);
+procedure procDeclaration(lexemes: lexeme_array; var i: integer);
+procedure procRestDeclaration(lexemes: lexeme_array; var i: integer);
+procedure procListIdent(lexemes: lexeme_array; var i: integer);
+procedure procType(lexemes: lexeme_array; var i: integer);
+procedure procRestListIdent(lexemes: lexeme_array; var i: integer);
+procedure procStmt(lexemes: lexeme_array; var i: integer);
+procedure procForStmt(lexemes: lexeme_array; var i: integer);
+procedure procIoStmt(lexemes: lexeme_array; var i: integer);
+procedure procWhileStmt(lexemes: lexeme_array; var i: integer);
+procedure procAtrib(lexemes: lexeme_array; var i: integer);
+procedure procIfStmt(lexemes: lexeme_array; var i: integer);
+procedure procEndFor(lexemes: lexeme_array; var i: integer);
+procedure procOutList(lexemes: lexeme_array; var i: integer);
+procedure procOut(lexemes: lexeme_array; var i: integer);
+procedure procRestOutList(lexemes: lexeme_array; var i: integer);
+procedure procExpr(lexemes: lexeme_array; var i: integer);
+procedure procElsePart(lexemes: lexeme_array; var i: integer);
+procedure procOr(lexemes: lexeme_array; var i: integer);
+procedure procAnd(lexemes: lexeme_array; var i: integer);
+procedure procRestOr(lexemes: lexeme_array; var i: integer);
+procedure procNot(lexemes: lexeme_array; var i: integer);
+procedure procRestAnd(lexemes: lexeme_array; var i: integer);
+procedure procRel(lexemes: lexeme_array; var i: integer);
+procedure procAdd(lexemes: lexeme_array; var i: integer);
+procedure procRestRel(lexemes: lexeme_array; var i: integer);
+procedure procMult(lexemes: lexeme_array; var i: integer);
+procedure procRestAdd(lexemes: lexeme_array; var i: integer);
+procedure procUno(lexemes: lexeme_array; var i: integer);
+procedure procRestMult(lexemes: lexeme_array; var i: integer);
+procedure procFactor(lexemes: lexeme_array; var i: integer);
 
 implementation
 
@@ -84,7 +116,7 @@ end;
 procedure procStmtList(lexemes: lexeme_array; var i: integer);
 const
     stmtSet: set of typeToken = [_FOR_, _READ_, _WRITE_, _READLN_, _WRITELN_,
-    _WHILE_,  _VARIABLE_, _IF_, _BEGIN_, _BREAK_, _CONTINUE_, _SEMICOLON_, _END_];
+    _WHILE_,  _VARIABLE_, _IF_, _BEGIN_, _BREAK_, _CONTINUE_, _SEMICOLON_];
 begin
     if lexemes[i].token_real in stmtSet then
     begin
