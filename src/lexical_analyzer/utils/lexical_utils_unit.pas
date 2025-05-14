@@ -14,7 +14,7 @@ function isOctal(s: string): boolean;
 function isDecimal(s: string): boolean;
 function isHexadecimal(s: string): boolean;
 function isFloat(s: string): boolean;
-procedure showError(state: states; currentLine, currentColumn: Integer; textToken: String);
+procedure showErrorLexical(state: states; currentLine, currentColumn: Integer; textToken: String);
 
 implementation
 
@@ -193,7 +193,7 @@ begin
         Exit(False);
 end;
 
-procedure showError(state: states; currentLine, currentColumn: Integer; textToken: String);
+procedure showErrorLexical(state: states; currentLine, currentColumn: Integer; textToken: String);
 begin
     case state of
         _BLOCK_COMMENT_:

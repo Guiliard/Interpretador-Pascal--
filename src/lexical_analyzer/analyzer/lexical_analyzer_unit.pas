@@ -149,7 +149,7 @@ begin
             begin
                 if (i = lengthProgram) then
                 begin
-                    showError(state, currentLine, currentColumn, textToken);
+                    showErrorLexical(state, currentLine, currentColumn, textToken);
                     state := states._ERROR_;
                 end 
 
@@ -222,7 +222,7 @@ begin
             begin
                 if (i = lengthProgram) then
                 begin
-                    showError(state, currentLine, currentColumn, textToken);
+                    showErrorLexical(state, currentLine, currentColumn, textToken);
                     state := states._ERROR_;
                 end
 
@@ -259,7 +259,7 @@ begin
                 lexemeList[length(lexemeList) - 1] := currentLexeme;
                 if (matchToken(textToken, False) = type_token_unit._INVALID_TOKEN_) then
                 begin
-                    showError(state, currentLine, currentColumn, textToken);
+                    showErrorLexical(state, currentLine, currentColumn, textToken);
                     state := states._ERROR_;
                 end
                 else 
