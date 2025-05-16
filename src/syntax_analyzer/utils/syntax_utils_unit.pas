@@ -6,47 +6,37 @@ uses
     type_token_unit,
     lexeme_unit;
 
-procedure advanceToken(lexemes: lexeme_array; var i: integer);
+procedure advanceToken(var i: integer);
+procedure showErrorSyntax(currentLexeme: lexeme; token: typeToken);
 procedure eatToken(lexemes: lexeme_array; var i: integer; token: typeToken);
-procedure showError(currentLexeme: lexeme);
 
 implementation
 
-procedure advanceToken(lexemes: lexeme_array; var i: integer);
+procedure advanceToken(var i: integer);
 begin 
-    if (i < High(lexemes)) then
-    begin
-        Inc(i);
-    end;
+    Inc(i);
 end;
 
 procedure eatToken(lexemes: lexeme_array; var i: integer; token: typeToken);
 begin 
-    if (token <> lexemes[i].token_real) then
+    if (i = High(lexemes)) then
+    begin
+        writeln(#10, 'Syntax Error: Unexpected end of file at line ', lexemes[i-1].line, '.', #10);
+        Halt(1);
+    end 
+    else 
+    if (lexemes[i].token_real <> token) then
     begin 
-        showError(lexemes[i]);
+        showErrorSyntax(lexemes[i], token);
         Halt(1);
     end;
-    advanceToken(lexemes, i)
+    advanceToken(i)
 end;
 
-procedure showError(currentLexeme: lexeme);
+procedure showErrorSyntax(currentLexeme: lexeme; token: typeToken);
 begin 
-    if (currentLexeme.token_real = type_token_unit._INVALID_TOKEN_) then
-    begin
-        writeln('Error: Invalid token at line ', currentLexeme.line, ', column ', currentLexeme.column, ', Token: ', currentLexeme.lex_text, '.', #10);
-    end
-
-    else
-    if (currentLexeme.token_real = type_token_unit._END_OF_FILE_) then
-    begin
-        writeln('Error: Unexpected end of file.', #10);
-    end
-    
-    else
-    begin
-        writeln('Error: Unexpected token at line ', currentLexeme.line, ', column ', currentLexeme.column, ', Token: ', currentLexeme.lex_text, '.', #10);
-    end;
+    writeln(#10, 'Syntax Error: Unexpected token at line ', currentLexeme.line, ', column ', currentLexeme.column, '. The token: "', currentLexeme.lex_text, '" is not appropriate.');
+    writeln('The token: "', currentLexeme.lex_text, '" is a ', currentLexeme.token_real, ' type.', ' It should be a ', token, ' type.', #10);
 end;
 
 end.

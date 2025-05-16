@@ -16,4 +16,6 @@ begin
   lexemes := lexicalAnalyzer(fileContent);
 
   syntaxAnalyzer(lexemes);
+
+  writeln('Syntax analysis completed successfully. No errors found.');
 end.

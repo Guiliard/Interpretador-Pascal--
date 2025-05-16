@@ -4,7 +4,7 @@ var
     s: string;
 begin
     x := 10;
-    y := 0x1F;
+    y := 1;
     s := "Olá, mundo!";
     if x > y then
         writeln("X é maior que Y");

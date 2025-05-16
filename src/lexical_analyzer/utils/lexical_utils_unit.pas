@@ -4,7 +4,8 @@ interface
 
 uses
     type_token_unit,
-    table_token_unit;
+    table_token_unit,
+    states_unit;
 
 function matchToken(textToken: string; finalVar: boolean): typeToken;
 function isAlpha(c: char): boolean;
@@ -13,7 +14,7 @@ function isOctal(s: string): boolean;
 function isDecimal(s: string): boolean;
 function isHexadecimal(s: string): boolean;
 function isFloat(s: string): boolean;
-function getTokenName(token: typeToken): string;
+procedure showErrorLexical(state: states; currentLine, currentColumn: Integer; textToken: String);
 
 implementation
 
@@ -192,64 +193,17 @@ begin
         Exit(False);
 end;
 
-
-function getTokenName(token: typeToken): string;
+procedure showErrorLexical(state: states; currentLine, currentColumn: Integer; textToken: String);
 begin
-    case token of
-        _ADD_: getTokenName := 'ADD (+)';
-        _SUB_: getTokenName := 'SUB (-)';
-        _MUL_: getTokenName := 'MUL (*)';
-        _REAL_DIV_: getTokenName := 'REAL_DIV (/)';
-        _MOD_: getTokenName := 'MOD (mod)';
-        _INTER_DIV_: getTokenName := 'INTER_DIV (div)';
+    case state of
+        _BLOCK_COMMENT_:
+            writeln(#10, 'Lexical Error: Unexpected end of file at line ', currentLine, ', column ', currentColumn, '. The block comment is not closed.', #10);
 
-        _OR_: getTokenName := 'OR (or)';
-        _AND_: getTokenName := 'AND (and)';
-        _NOT_: getTokenName := 'NOT (not)';
-        _EQUAL_: getTokenName := 'EQUAL (= || ==)';
-        _NOT_EQUAL_: getTokenName := 'NOT_EQUAL (<>)';
-        _GREATER_: getTokenName := 'GREATER (>)';
-        _GREATER_EQUAL_: getTokenName := 'GREATER_EQUAL (>=)';
-        _LOWER_: getTokenName := 'LOWER (<)';
-        _LOWER_EQUAL_: getTokenName := 'LOWER_EQUAL (<=)';
-        _ASSIGN_: getTokenName := 'ASSIGN (:=)';
+        _STRING_:
+            writeln(#10, 'Lexical Error: Unexpected end of file at line ', currentLine, ', column ', currentColumn, '. The string is not closed.', #10);
 
-        _PROGRAM_: getTokenName := 'PROGRAM';
-        _VAR_: getTokenName := 'VAR';
-        _INTEGER_: getTokenName := 'INTEGER';
-        _REAL_: getTokenName := 'REAL';
-        _STRING_: getTokenName := 'STRING';
-        _BEGIN_: getTokenName := 'BEGIN';
-        _END_: getTokenName := 'END';
-        _FOR_: getTokenName := 'FOR';
-        _TO_: getTokenName := 'TO';
-        _WHILE_: getTokenName := 'WHILE';
-        _DO_: getTokenName := 'DO';
-        _BREAK_: getTokenName := 'BREAK';
-        _CONTINUE_: getTokenName := 'CONTINUE';
-        _IF_: getTokenName := 'IF';
-        _ELSE_: getTokenName := 'ELSE';
-        _THEN_: getTokenName := 'THEN';
-        _WRITE_: getTokenName := 'WRITE';
-        _WRITELN_: getTokenName := 'WRITELN';
-        _READ_: getTokenName := 'READ';
-        _READLN_: getTokenName := 'READLN';
-
-        _SEMICOLON_: getTokenName := 'SEMICOLON (;)';
-        _COMMA_: getTokenName := 'COMMA (,)';
-        _DOT_: getTokenName := 'DOT (.)';
-        _COLON_: getTokenName := 'COLON (:)';
-        _LEFT_PAREN_: getTokenName := 'LEFT_PAREN (()';
-        _RIGHT_PAREN_: getTokenName := 'RIGHT_PAREN ())';
-
-        _VARIABLE_: getTokenName := 'VARIABLE';
-        _HEXADECIMAL_: getTokenName := 'HEXADECIMAL';
-        _OCTAL_: getTokenName := 'OCTAL';
-        _DECIMAL_: getTokenName := 'DECIMAL';
-        _FLOAT_: getTokenName := 'FLOAT';
-        _STRING_LITERAL_: getTokenName := 'STRING_LITERAL';
-        _INVALID_TOKEN_: getTokenName := 'INVALID_TOKEN';
-        _END_OF_FILE_: getTokenName := 'END_OF_FILE';
+        _FINAL_NUMBER_:
+            writeln(#10, 'Lexical Error: Unexpected token at line ', currentLine, ', column ', currentColumn, '. The number "', textToken, '" is not valid.', #10);
     end;
 end;
 

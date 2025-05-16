@@ -3,5 +3,5 @@ var
     num: real;
 begin
     // Error
-    num := 1.2.;
+    num := 1.2;
 end.

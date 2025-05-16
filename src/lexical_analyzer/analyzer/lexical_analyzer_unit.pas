@@ -149,7 +149,7 @@ begin
             begin
                 if (i = lengthProgram) then
                 begin
-                    writeln('Error: Unexpected end of file at line ', currentLine, ', column ', currentColumn, ' The block comment is not closed.', #10);
+                    showErrorLexical(state, currentLine, currentColumn, textToken);
                     state := states._ERROR_;
                 end 
 
@@ -222,7 +222,7 @@ begin
             begin
                 if (i = lengthProgram) then
                 begin
-                    writeln('Error: Unexpected end of file at line ', currentLine, ', column ', currentColumn, ' The string is not closed.', #10);
+                    showErrorLexical(state, currentLine, currentColumn, textToken);
                     state := states._ERROR_;
                 end
 
@@ -259,7 +259,7 @@ begin
                 lexemeList[length(lexemeList) - 1] := currentLexeme;
                 if (matchToken(textToken, False) = type_token_unit._INVALID_TOKEN_) then
                 begin
-                    writeln('Error: Unexpected character at line ', currentLine, ', column ', currentColumn, ' The number ', textToken, ' is not valid.', #10);
+                    showErrorLexical(state, currentLine, currentColumn, textToken);
                     state := states._ERROR_;
                 end
                 else 
@@ -280,7 +280,7 @@ begin
 
             states._ERROR_:
             begin
-                break;
+                Halt(1);
             end;
         end;
     end;
