@@ -53,6 +53,11 @@ begin
     procStmtList(lexemes, i);
     eatToken(lexemes, i, type_token_unit._END_);
     eatToken(lexemes, i, type_token_unit._DOT_);
+    if (High(lexemes) > i) then
+    begin 
+        writeln(#10, 'Syntax Error: Unexpected tokens after ''end.'' (remaining tokens: ', High(lexemes) - i, ', expected: 0)', #10);
+        Halt(1);
+    end
 end;
 
 procedure procDeclarations(lexemes: lexeme_array; var i: integer);
