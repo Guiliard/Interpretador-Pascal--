@@ -107,6 +107,12 @@ begin
     if lexemes[i].token_real in typeSet then
     begin
         eatToken(lexemes, i, lexemes[i].token_real);
+    end
+    else
+    begin
+        writeln(#10, 'Syntax Error: Unexpected token at line ', lexemes[i].line, ', column ', lexemes[i].column, '. The token: "', lexemes[i].lex_text, '" is not appropriate.');
+        writeln('The token: "', lexemes[i].lex_text, '" is a ', lexemes[i].token_real, ' type.', ' It should be a _INTEGER_, _REAL_ or _STRING_ type.', #10);
+        Halt(1);
     end;
 end;
 
@@ -463,6 +469,12 @@ begin
     if lexemes[i].token_real in factorSet then
     begin
         eatToken(lexemes, i, lexemes[i].token_real);
+    end
+    else
+    begin
+        writeln(#10, 'Syntax Error: Unexpected token at line ', lexemes[i].line, ', column ', lexemes[i].column, '. The token: "', lexemes[i].lex_text, '" is not appropriate.');
+        writeln('The token: "', lexemes[i].lex_text, '" is a ', lexemes[i].token_real, ' type.', ' It should be a _STRING_LITERAL_, _VARIABLE_, _DECIMAL_, _FLOAT_, _HEXADECIMAL_ or _OCTAL_ type.', #10);
+        Halt(1);
     end;
 end;
 
