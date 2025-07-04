@@ -1,0 +1,4 @@
+('ADD','TEMP1','a','b')
+('MULT','TEMP1','TEMP1','c')
+('ATT','d','TEMP1',none)
+('CALL','WRITE','a',none)
