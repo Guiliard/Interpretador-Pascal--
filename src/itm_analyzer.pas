@@ -20,6 +20,7 @@ var
   instructions: ItmArray;
 
 function isAtt(op: string): boolean;
+function isCwrite(op: string; op2: string): boolean;
 procedure append(var arr: ItmArray; instr: ItmInstruction);
 function analyzeItm(content: AnsiString): ItmArray;
 
@@ -37,6 +38,11 @@ end;
 function isAtt(op: string): boolean;
 begin
   isAtt := (op = 'ATT');
+end;
+
+function isCwrite(op: string; op2: string): boolean;
+begin
+  isCwrite := (op = 'CALL') and (op2 = 'WRITE');
 end;
 
 function isNumeric(s: string; var isFloat: boolean): boolean;
@@ -92,26 +98,39 @@ var
   c: char;
   token: string;
   inSingleQuotes, inDoubleQuotes: boolean;
-  isFloat: boolean;
 begin
+  // Inicialização
+  for i := 1 to 4 do
+  begin
+    parts[i] := '';
+    raw_parts[i] := '';
+  end;
+
+  // Limpeza da linha
   line := Trim(line);
   if (line <> '') and (line[1] = '(') then Delete(line, 1, 1);
   if (line <> '') and (line[Length(line)] = ')') then Delete(line, Length(line), 1);
 
+  // Parsing da linha
   p := 1;
   token := '';
   inSingleQuotes := False;
   inDoubleQuotes := False;
 
-  i := 1;
-  while i <= Length(line) do
+  for i := 1 to Length(line) do
   begin
     c := line[i];
 
     if c = '''' then
-      inSingleQuotes := not inSingleQuotes
+    begin
+      inSingleQuotes := not inSingleQuotes;
+      token := token + c;
+    end
     else if c = '"' then
-      inDoubleQuotes := not inDoubleQuotes
+    begin
+      inDoubleQuotes := not inDoubleQuotes;
+      token := token + c;
+    end
     else if (c = ',') and (not inSingleQuotes) and (not inDoubleQuotes) then
     begin
       raw_parts[p] := Trim(token);
@@ -120,58 +139,42 @@ begin
     end
     else
       token := token + c;
-
-    Inc(i);
   end;
 
-  if p <= 4 then
+  // Último token
+  if (p <= 4) and (token <> '') then
     raw_parts[p] := Trim(token);
 
+  // Copia para parts
   for i := 1 to 4 do
     parts[i] := raw_parts[i];
 
-  // Determine argument type for ATT instructions
-  if isAtt(UpperCase(parts[1])) then
+  // Determinação do tipo simplificada
+  if (Length(parts[3]) >= 2) then
   begin
-    if (Length(raw_parts[3]) > 1) and (raw_parts[3][1] = '''') and (raw_parts[3][Length(raw_parts[3])] = '''') then
-    begin
-      // Case 4: ('att','na','2',none) - char
-      splitLine.arg_type := 'char';
-    end
-    else if (Length(raw_parts[3]) > 1) and (raw_parts[3][1] = '"') and (raw_parts[3][Length(raw_parts[3])] = '"') then
-    begin
-      // Case 1 and 5: ("abcdefghi none , , ahgshgsh") or ("265") - string
-      splitLine.arg_type := 'string';
-    end
-    else if isNumeric(raw_parts[3], isFloat) then
-    begin
-      if isFloat then
-        // Case 2: 26.7 - float
-        splitLine.arg_type := 'float'
-      else
-        // Case 3: 2 - integer
-        splitLine.arg_type := 'integer';
-    end
-    else
-      splitLine.arg_type := 'none';
+    if (parts[3][1] = '"') and (parts[3][Length(parts[3])] = '"') then
+      splitLine.arg_type := 'string'
+    else if (parts[3][1] = '''') and (parts[3][Length(parts[3])] = '''') then
+      splitLine.arg_type := 'var';
   end
   else
     splitLine.arg_type := 'none';
 
-  // Remove quotes from values but keep the content
+  // Remove aspas mantendo conteúdo
   for i := 1 to 4 do
   begin
-    if (Length(parts[i]) > 1) and ((parts[i][1] = '''') and (parts[i][Length(parts[i])] = '''')) then
-      parts[i] := Copy(parts[i], 2, Length(parts[i]) - 2)
-    else if (Length(parts[i]) > 1) and ((parts[i][1] = '"') and (parts[i][Length(parts[i])] = '"')) then
-      parts[i] := Copy(parts[i], 2, Length(parts[i]) - 2);
+    if (Length(parts[i]) >= 2) then
+    begin
+      if (parts[i][1] in ['''', '"']) and (parts[i][Length(parts[i])] = parts[i][1]) then
+        parts[i] := Copy(parts[i], 2, Length(parts[i]) - 2);
+    end;
   end;
 
+  // Preenche a estrutura de retorno
   splitLine.instr.op := UpperCase(parts[1]);
   splitLine.instr.arg1 := parts[2];
   splitLine.instr.arg2 := parts[3];
   splitLine.instr.arg3 := parts[4];
-  splitLine.instr.arg_type := splitLine.arg_type;
 end;
 
 function analyzeItm(content: AnsiString): ItmArray;

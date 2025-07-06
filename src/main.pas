@@ -6,7 +6,8 @@ uses
   lexical_analyzer_unit,
   syntax_analyzer_unit,
   itm_reader,
-  itm_analyzer;   
+  itm_analyzer,
+  itm_runner;   
 
 var
   fileContent: AnsiString;
@@ -34,9 +35,11 @@ begin
     Writeln('  ARG1: ', itms[i].arg1);
     Writeln('  ARG2: ', itms[i].arg2);
     Writeln('  ARG3: ', itms[i].arg3);
-    if itms[i].op = 'ATT' then
+    if (itms[i].op = 'ATT') or (itms[i].op = 'CALL') then
       Writeln('  TIPO: ', itms[i].arg_type);
     Writeln('---------------------');
   end;
+
+  RunInstructions(itms);
 
 end.
