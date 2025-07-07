@@ -341,7 +341,7 @@ begin
     instr := arr[i];
     WriteLn('Running Instruction ', i, ': ', instr.op);
     
-    if instr.op = 'ATT' then
+    if instr.op = 'ASSIGN' then
     begin
       if VariableExists(instr.arg1, sarr, iarr, farr) then
         ErrorAndExit('Variável já existe: ' + instr.arg1);
@@ -971,9 +971,7 @@ begin
     begin
       if instr.arg1 = 'WRITE' then
       begin
-        if instr.arg1 = '\n' then
-          writeln()
-        else if instr.arg_type = 'string' then
+        if instr.arg_type = 'string' then
           write(instr.arg2)
         else if instr.arg_type = 'var' then
         begin
@@ -1006,6 +1004,46 @@ begin
               write('true')
             else
               write('false');
+          end
+          else
+            ErrorAndExit('Tipo de variável desconhecido: ' + varType);
+        end
+      end
+      else if instr.arg1 = 'WRITELN' then
+      begin
+        if instr.arg_type = 'string' then
+          writeln(instr.arg2)
+        else if instr.arg_type = 'var' then
+        begin
+          varType := FindVariableType(instr.arg2, sarr, iarr, farr, barr);
+          
+          // Verifica o tipo da variável e imprime seu valor
+          if varType = 'string' then
+          begin
+            if not FindInStringArray(sarr, instr.arg2, strVal) then
+              ErrorAndExit('Variável string não encontrada: ' + instr.arg2);
+            writeln(strVal); // Imprime o valor da string
+          end
+          else if varType = 'int' then
+          begin
+            if not FindInIntArray(iarr, instr.arg2, intVal) then
+              ErrorAndExit('Variável int não encontrada: ' + instr.arg2);
+            writeln(intVal); // Imprime o valor do inteiro
+          end
+          else if varType = 'float' then
+          begin
+            if not FindInFloatArray(farr, instr.arg2, floatValue) then
+              ErrorAndExit('Variável float não encontrada: ' + instr.arg2);
+            writeln(floatValue:0:6); // Imprime o float com 2 casas decimais
+          end
+          else if varType = 'bool' then
+          begin
+            if not FindInBoolArray(barr, instr.arg2, boolVal) then
+              ErrorAndExit('Variável bool não encontrada: ' + instr.arg2);
+            if boolVal then
+              writeln('true')
+            else
+              writeln('false');
           end
           else
             ErrorAndExit('Tipo de variável desconhecido: ' + varType);

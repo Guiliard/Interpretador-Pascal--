@@ -5,16 +5,29 @@ interface
 uses 
     syntax_utils_unit,
     lexeme_unit, 
-    type_token_unit;
+    type_token_unit,
+    intermediate_code_unit,
+    intermediate_utils_unit;
+
+type
+  TPendingVar = record
+    name: string;
+    line: integer;  // Opcional: para mensagens de erro
+  end;
+  TPendingVarList = array of TPendingVar;
+
+var
+  arrayIntermediateCode: array of intermediate_code;
+  pendingVars: TPendingVarList; 
 
 procedure procMain(lexemes: lexeme_array; var i: integer);
 procedure procDeclarations(lexemes: lexeme_array; var i: integer); 
 procedure procStmtList(lexemes: lexeme_array; var i: integer);
 procedure procDeclaration(lexemes: lexeme_array; var i: integer);
 procedure procRestDeclaration(lexemes: lexeme_array; var i: integer);
-procedure procListIdent(lexemes: lexeme_array; var i: integer);
-procedure procType(lexemes: lexeme_array; var i: integer);
-procedure procRestListIdent(lexemes: lexeme_array; var i: integer);
+procedure procListIdent(lexemes: lexeme_array; var i: integer; var varType: string);
+procedure procType(lexemes: lexeme_array; var i: integer; var varType: string);
+procedure procRestListIdent(lexemes: lexeme_array; var i: integer; var varType: string);
 procedure procStmt(lexemes: lexeme_array; var i: integer);
 procedure procForStmt(lexemes: lexeme_array; var i: integer);
 procedure procIoStmt(lexemes: lexeme_array; var i: integer);
@@ -45,6 +58,8 @@ implementation
 
 procedure procMain(lexemes: lexeme_array; var i: integer);
 begin
+    SetLength(arrayIntermediateCode, 0);
+    SetLength(pendingVars, 0);
     eatToken(lexemes, i, type_token_unit._PROGRAM_);
     eatToken(lexemes, i, type_token_unit._VARIABLE_);
     eatToken(lexemes, i, type_token_unit._SEMICOLON_);
@@ -53,6 +68,7 @@ begin
     procStmtList(lexemes, i);
     eatToken(lexemes, i, type_token_unit._END_);
     eatToken(lexemes, i, type_token_unit._DOT_);
+    printIntermediateCode(arrayIntermediateCode);
     if (High(lexemes) > i) then
     begin 
         writeln(#10, 'Syntax Error: Unexpected tokens after ''end.'' (remaining tokens: ', High(lexemes) - i, ', expected: 0)', #10);
@@ -68,26 +84,46 @@ begin
 end;
 
 procedure procDeclaration(lexemes: lexeme_array; var i: integer);
+var
+    varType: string;
 begin
-    procListIdent(lexemes, i);
+    procListIdent(lexemes, i, varType);
     eatToken(lexemes, i, type_token_unit._COLON_); 
-    procType(lexemes, i);
+    procType(lexemes, i, varType);
     eatToken(lexemes, i, type_token_unit._SEMICOLON_);
 end;
 
-procedure procListIdent(lexemes: lexeme_array; var i: integer);
+procedure procListIdent(lexemes: lexeme_array; var i: integer; var varType: string);
+var
+  varName: string;
 begin
-    eatToken(lexemes, i, type_token_unit._VARIABLE_);
-    procRestListIdent(lexemes, i);
+  varName := lexemes[i].lex_text;
+  eatToken(lexemes, i, type_token_unit._VARIABLE_);
+
+  // Adiciona à lista de variáveis pendentes (sem tipo ainda)
+  SetLength(pendingVars, Length(pendingVars) + 1);
+  pendingVars[High(pendingVars)].name := varName;
+  pendingVars[High(pendingVars)].line := lexemes[i].line;
+
+  procRestListIdent(lexemes, i, varType);
 end;
 
-procedure procRestListIdent(lexemes: lexeme_array; var i: integer);
+procedure procRestListIdent(lexemes: lexeme_array; var i: integer; var varType: string);
+var
+    varName: string;
 begin
     if lexemes[i].token_real = type_token_unit._COMMA_ then
     begin
-        eatToken(lexemes, i, type_token_unit._COMMA_);    
-        eatToken(lexemes, i, type_token_unit._VARIABLE_); 
-        procRestListIdent(lexemes, i);                    
+        eatToken(lexemes, i, type_token_unit._COMMA_);
+        varName := lexemes[i].lex_text;
+        eatToken(lexemes, i, type_token_unit._VARIABLE_);
+        
+        // Adiciona à lista de variáveis pendentes (assim como no procListIdent)
+        SetLength(pendingVars, Length(pendingVars) + 1);
+        pendingVars[High(pendingVars)].name := varName;
+        pendingVars[High(pendingVars)].line := lexemes[i].line;
+            
+        procRestListIdent(lexemes, i, varType); // Chama recursivamente
     end;
 end;
 
@@ -95,25 +131,49 @@ procedure procRestDeclaration(lexemes: lexeme_array; var i: integer);
 begin
     if lexemes[i].token_real = type_token_unit._VARIABLE_ then
     begin
-        procDeclaration(lexemes, i);   
+        procDeclaration(lexemes, i);
         procRestDeclaration(lexemes, i);
     end;
 end;
 
-procedure procType(lexemes: lexeme_array; var i: integer);
+procedure procType(lexemes: lexeme_array; var i: integer; var varType: string);
 const 
-    typeSet: set of typeToken = [_INTEGER_, _REAL_, _STRING_];
+  typeSet: set of typeToken = [_INTEGER_, _REAL_, _STRING_];
+var
+  j: integer;
+  initialValue: string; // Valor inicial baseado no tipo
 begin
-    if lexemes[i].token_real in typeSet then
-    begin
-        eatToken(lexemes, i, lexemes[i].token_real);
-    end
-    else
-    begin
-        writeln(#10, 'Syntax Error: Unexpected token at line ', lexemes[i].line, ', column ', lexemes[i].column, '. The token: "', lexemes[i].lex_text, '" is not appropriate.');
-        writeln('The token: "', lexemes[i].lex_text, '" is a ', lexemes[i].token_real, ' type.', ' It should be a _INTEGER_, _REAL_ or _STRING_ type.', #10);
-        Halt(1);
+  if lexemes[i].token_real in typeSet then
+  begin
+    case lexemes[i].token_real of
+      _INTEGER_: 
+      begin
+        varType := 'integer';
+        initialValue := '0'; // Valor padrão para inteiros
+      end;
+      _REAL_:    
+      begin
+        varType := 'float';
+        initialValue := '0.0'; // Valor padrão para floats
+      end;
+      _STRING_:  
+      begin
+        varType := 'string';
+        initialValue := ''''''; // String vazia (duas aspas simples)
+      end;
     end;
+    eatToken(lexemes, i, lexemes[i].token_real);
+
+    // Gera código para todas as variáveis pendentes com valor inicial correto
+    for j := 0 to High(pendingVars) do
+    begin
+      addIntermediateCode(arrayIntermediateCode,
+        buildAssignCode(pendingVars[j].name, initialValue, varType));
+    end;
+    SetLength(pendingVars, 0);  // Limpa a lista
+  end
+  else
+    // ... (manter o tratamento de erro atual)
 end;
 
 procedure procBlock(lexemes: lexeme_array; var i: integer);
