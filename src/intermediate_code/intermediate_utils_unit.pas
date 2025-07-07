@@ -14,7 +14,7 @@ const
     OP_ADD = 'ADD';
     OP_SUB = 'SUB';
     OP_MUL = 'MUL';
-    OP_RDIV = 'DIV';
+    OP_DIV = 'DIV';
     OP_IDIV = 'IDIV';
     OP_MOD = 'MOD';
     OP_AND = 'AND';
@@ -131,7 +131,7 @@ begin
         OP_ADD:    writeln('ADD    ', op1, ', ', op2, ' -> ', op3);
         OP_SUB:    writeln('SUB    ', op1, ', ', op2, ' -> ', op3);
         OP_MUL:    writeln('MUL    ', op1, ', ', op2, ' -> ', op3);
-        OP_LABEL:  writeln('LABEL  ', op3);
+        OP_LABEL:  writeln('LABEL  ', op1);
         OP_IF:     writeln('IF     ', op1, ' THEN GOTO ', op2, ' ELSE GOTO ', op3);
         OP_JUMP:   writeln('JUMP   ', op3);
         // Adicione outros casos conforme necessário (WRITE, READ, etc.)
