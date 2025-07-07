@@ -135,7 +135,7 @@ begin
         OP_IF:     writeln('IF     ', op1, ' THEN GOTO ', op2, ' ELSE GOTO ', op3);
         OP_JUMP:   writeln('JUMP   ', op3);
         // Adicione outros casos conforme necessário (WRITE, READ, etc.)
-        else       writeln(code_type, ' ', op1, ', ', op2, ', ', op3);
+        else       writeln(code_type, ' ', op1, ', ', op2, ', ', op3, ' (Type: ', op_type, ')');
       end;
     end;
   end;

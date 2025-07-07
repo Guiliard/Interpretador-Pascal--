@@ -4,20 +4,24 @@ interface
 
 uses 
     proc_unit,
-    lexeme_unit;
+    lexeme_unit,
+    intermediate_code_unit,
+    intermediate_utils_unit;
 
-procedure syntaxAnalyzer(lexemes: lexeme_array);
+function syntaxAnalyzer(lexemes: lexeme_array): arrayCode;
 
 implementation
 
-procedure syntaxAnalyzer(lexemes: lexeme_array);
+function syntaxAnalyzer(lexemes: lexeme_array): arrayCode;
 
 var 
     i: integer;
+    code: arrayCode;
 
 begin
     i := 0;
-    procMain(lexemes, i);
+    code := procMain(lexemes, i);
+    Exit(code);
 end;
 
 end.

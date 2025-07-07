@@ -184,8 +184,9 @@ var
   line: string;
   res: ItmSplitResult;
   instr: ItmInstruction;
+  resultArray: ItmArray;
 begin
-  SetLength(analyzeItm, 0);
+  SetLength(resultArray, 0);
 
   lines := TStringList.Create;
   lines.Text := content;
@@ -200,10 +201,12 @@ begin
     instr := res.instr;
     instr.arg_type := res.arg_type;
 
-    append(analyzeItm, instr);
+    append(resultArray, instr);
   end;
   
   lines.Free;
+  Exit(resultArray);
 end;
+
 
 end.

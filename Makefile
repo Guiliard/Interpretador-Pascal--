@@ -16,7 +16,7 @@ DATA_TARGETS = $(addprefix $(BIN_DIR)/,$(DATA_FILES))
 
 FPCFLAGS = -FE$(BIN_DIR) -FU$(OBJECT_DIR) $(foreach dir,$(SRC_SUBDIRS),-Fu$(dir))
 
-all: $(BIN_FILE) $(DATA_TARGETS)
+all: $(BIN_FILE)
 
 $(BIN_FILE): $(MAIN_SRC)
 	@mkdir -p $(BIN_DIR) $(OBJECT_DIR)

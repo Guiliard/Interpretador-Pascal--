@@ -15,14 +15,17 @@ type
     name: string;
     line: integer;  // Opcional: para mensagens de erro
   end;
+
   TPendingVarList = array of TPendingVar;
 
+  arrayCode = array of intermediate_code;
+
 var
-  arrayIntermediateCode: array of intermediate_code;
+  arrayIntermediateCode: arrayCode;
   pendingVars: TPendingVarList;
   tempCount: SmallInt = 0;
 
-procedure procMain(lexemes: lexeme_array; var i: integer);
+function procMain(lexemes: lexeme_array; var i: integer) : arrayCode;
 procedure procDeclarations(lexemes: lexeme_array; var i: integer); 
 procedure procStmtList(lexemes: lexeme_array; var i: integer);
 procedure procDeclaration(lexemes: lexeme_array; var i: integer);
@@ -58,7 +61,7 @@ procedure procFactor(lexemes: lexeme_array; var i: integer);
 
 implementation
 
-procedure procMain(lexemes: lexeme_array; var i: integer);
+function procMain(lexemes: lexeme_array; var i: integer): arrayCode;
 begin
     SetLength(arrayIntermediateCode, 0);
     SetLength(pendingVars, 0);
@@ -75,7 +78,8 @@ begin
     begin 
         writeln(#10, 'Syntax Error: Unexpected tokens after ''end.'' (remaining tokens: ', High(lexemes) - i, ', expected: 0)', #10);
         Halt(1);
-    end
+    end;
+    Exit(arrayIntermediateCode);
 end;
 
 procedure procDeclarations(lexemes: lexeme_array; var i: integer);

@@ -7,7 +7,9 @@ uses
   syntax_analyzer_unit,
   itm_reader,
   itm_analyzer,
-  itm_runner;   
+  itm_runner, 
+  itm_file_unit,
+  proc_unit;
 
 var
   fileContent: AnsiString;
@@ -15,15 +17,18 @@ var
   lexemes: lexeme_array;
   itms: ItmArray;
   i: integer;
+  code: arrayCode;
 
 begin
   fileContent := ReadFileToString;
   
   lexemes := lexicalAnalyzer(fileContent);
 
-  syntaxAnalyzer(lexemes);
+  code := syntaxAnalyzer(lexemes);
 
   writeln('Syntax analysis completed successfully. No errors found.');
+
+  saveIntermediateCodeAsTupleFormat('itm.txt', code);
 
   itmContent := readItmFile;
   itms := analyzeItm(itmContent);
