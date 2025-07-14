@@ -37,7 +37,7 @@ end;
 
 function isAtt(op: string): boolean;
 begin
-  isAtt := (op = 'ATT');
+  isAtt := (op = 'ASSIGN');
 end;
 
 function isCwrite(op: string; op2: string): boolean;
@@ -98,6 +98,7 @@ var
   c: char;
   token: string;
   inSingleQuotes, inDoubleQuotes: boolean;
+  isFloat: boolean;
 begin
   // Inicialização
   for i := 1 to 4 do
@@ -149,7 +150,9 @@ begin
   for i := 1 to 4 do
     parts[i] := raw_parts[i];
 
-  // Determinação do tipo simplificada
+  // Determinação do tipo
+  splitLine.arg_type := 'none'; // padrão
+  
   if (Length(parts[3]) >= 2) then
   begin
     if (parts[3][1] = '"') and (parts[3][Length(parts[3])] = '"') then
@@ -157,8 +160,13 @@ begin
     else if (parts[3][1] = '''') and (parts[3][Length(parts[3])] = '''') then
       splitLine.arg_type := 'var';
   end
-  else
-    splitLine.arg_type := 'none';
+  else if isNumeric(parts[3], isFloat) then
+  begin
+    if isFloat then
+      splitLine.arg_type := 'float'
+    else
+      splitLine.arg_type := 'integer';
+  end;
 
   // Remove aspas mantendo conteúdo
   for i := 1 to 4 do

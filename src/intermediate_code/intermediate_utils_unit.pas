@@ -58,20 +58,40 @@ var
   labelCount: Integer = 0;
 
 function buildOperationCode(opType: string; dest: string; op1: string; op2: string; operandType: string): intermediate_code;
-var
-  code: intermediate_code;
 begin
-  code.code_type := opType;
-  code.op1 := dest;
-  code.op2 := op1;
-  code.op3 := op2;
-  code.op_type := operandType;
-  buildOperationCode := code;
+  buildOperationCode.code_type := opType;
+  buildOperationCode.op1 := dest;
+  buildOperationCode.op2 := op1;
+  buildOperationCode.op3 := op2;
+  buildOperationCode.op_type := operandType;
 end;
 
 function buildAssignCode(varName: string; value: string; varType: string): intermediate_code;
+var
+  actualType: string;
 begin
-  buildAssignCode := buildOperationCode(OP_ASSIGN, varName, value, '', varType);
+  // Verificação para strings entre aspas
+  if (Length(value) >= 2) and (value[1] = '"') and (value[Length(value)] = '"') then
+  begin
+    actualType := 'string';
+  end
+  // Verifica se é um valor numérico
+  else if (varType = 'var') and (value <> '') then
+  begin
+    if value[1] in ['0'..'9'] then  // Se começa com dígito
+    begin
+      if Pos('.', value) > 0 then
+        actualType := 'float'
+      else
+        actualType := 'integer';
+    end
+    else
+      actualType := varType;  // Mantém o tipo original se não for número
+  end
+  else
+    actualType := varType;
+
+  buildAssignCode := buildOperationCode(OP_ASSIGN, varName, value, '', actualType);
 end;
 
 function buildWriteCode(value: string; valueType: string): intermediate_code;

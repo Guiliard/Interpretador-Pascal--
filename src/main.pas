@@ -40,7 +40,7 @@ begin
     Writeln('  ARG1: ', itms[i].arg1);
     Writeln('  ARG2: ', itms[i].arg2);
     Writeln('  ARG3: ', itms[i].arg3);
-    if (itms[i].op = 'ATT') or (itms[i].op = 'CALL') then
+    if (itms[i].op = 'ASSIGN') or (itms[i].op = 'CALL') then
       Writeln('  TIPO: ', itms[i].arg_type);
     Writeln('---------------------');
   end;

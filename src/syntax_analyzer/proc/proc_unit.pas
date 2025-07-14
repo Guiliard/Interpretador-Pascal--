@@ -8,7 +8,8 @@ uses
     type_token_unit,
     intermediate_code_unit,
     intermediate_utils_unit,
-    SysUtils;
+    SysUtils,
+    StrUtils;
 
 type
   TPendingVar = record
@@ -453,6 +454,7 @@ end;
 procedure procIfStmt(lexemes: lexeme_array; var i: integer);
 var
   elseLabel, endLabel: string;
+  tempVar: string;
 begin
   // Cria labels para controle de fluxo
   elseLabel := newLabel();
@@ -460,14 +462,13 @@ begin
   
   eatToken(lexemes, i, type_token_unit._IF_);
   
-  // Processa a condição (deixa resultado no último temp)
+  // Processa a expressão de condição
   procExpr(lexemes, i);
+  tempVar := 't' + IntToStr(tempCount-1); // Pega o último temp gerado
   
-  // Gera condição (se falso, pula para elseLabel)
+  // Gera o IF com os labels
   addIntermediateCode(arrayIntermediateCode,
-    buildIfCode('t' + IntToStr(tempCount), elseLabel, ''));
-  
-  Inc(tempCount);
+    buildIfCode(tempVar, elseLabel, ''));
   
   eatToken(lexemes, i, type_token_unit._THEN_);
   
@@ -477,7 +478,7 @@ begin
   // Pula para o fim (para não executar o ELSE)
   addIntermediateCode(arrayIntermediateCode, buildJumpCode(endLabel));
   
-  // Label do ELSE (se existir)
+  // Label do ELSE
   addIntermediateCode(arrayIntermediateCode, buildLabelCode(elseLabel));
   
   // Processa o ELSE (se existir)
@@ -498,55 +499,36 @@ end;
 
 procedure procAtrib(lexemes: lexeme_array; var i: integer);
 var
-  varName, value, varType: string;
-  isInteger, isFloat: Boolean;
-  dummyInt: LongInt;
-  dummyFloat: Double;
+  varName, value: string;
   tempResult: string;
 begin
-  // 1. Obter nome da variável
   varName := lexemes[i].lex_text;
   eatToken(lexemes, i, type_token_unit._VARIABLE_);
   eatToken(lexemes, i, type_token_unit._ASSIGN_);
 
-  // 2. Detecção automática do tipo do valor
-  value := lexemes[i].lex_text;
-  
-  // Verifica se é integer
-  isInteger := TryStrToInt(value, dummyInt);
-  
-  // Se não for integer, verifica se é float
-  if not isInteger then
-    isFloat := TryStrToFloat(value, dummyFloat)
-  else
-    isFloat := False;
+  tempCount := 0;
 
-  // Determina o tipo
-  if isInteger then
-    varType := 'integer'
-  else if isFloat then
-    varType := 'real'
-  else if lexemes[i].token_real = _STRING_LITERAL_ then
-    varType := 'string'
-  else
-    varType := 'integer'; // Caso padrão (será tratado como string)
-
-  // 3. Processa a expressão (versão simplificada sem procExpr)
   if lexemes[i].token_real in [_VARIABLE_, _DECIMAL_, _FLOAT_, _STRING_LITERAL_] then
   begin
+    value := lexemes[i].lex_text;
+    tempResult := 'temp' + IntToStr(tempCount);
+    Inc(tempCount);
+    
+    // Gera código com tipo automático
     addIntermediateCode(arrayIntermediateCode, 
-      buildAssignCode(varName, value, varType));
+      buildAssignCode(tempResult, value, 'var')); // 'var' será corrigido para números
+    
     eatToken(lexemes, i, lexemes[i].token_real);
   end
   else
   begin
-    // Caso de expressões complexas (operações aritméticas)
     procExpr(lexemes, i);
-    tempResult := 't' + IntToStr(tempCount);
-    Inc(tempCount);
-    addIntermediateCode(arrayIntermediateCode,
-      buildAssignCode(varName, tempResult, 'integer')); // Assume integer para expressões
+    tempResult := 'temp' + IntToStr(tempCount - 1);
   end;
+
+  // Atribuição final sempre como 'var'
+  addIntermediateCode(arrayIntermediateCode,
+    buildAssignCode(varName, tempResult, 'var'));
 end;
 
 procedure procExpr(lexemes: lexeme_array; var i: integer);
@@ -556,21 +538,30 @@ end;
 
 procedure procOr(lexemes: lexeme_array; var i: integer);
 var
-  temp1, temp2: string;
+  leftTemp, rightTemp, resultTemp: string;
 begin
-  procAnd(lexemes, i);  // Processa o primeiro operando (deixa resultado em tX)
-  temp1 := 't' + IntToStr(tempCount); // Pega o temp do primeiro operando
-  Inc(tempCount);
+  // Processa o operando esquerdo
+  procAnd(lexemes, i);
+  leftTemp := 'temp' + IntToStr(tempCount - 1); // Pega o último temp gerado
   
-  procRestOr(lexemes, i);
-  
-  // Se encontrou um OR, gera código
-  if (i < Length(lexemes)) and (lexemes[i].token_real = type_token_unit._OR_) then
+  // Verifica se há operadores OR seguintes
+  while (i <= High(lexemes)) and (lexemes[i].token_real = type_token_unit._OR_) do
   begin
-    temp2 := 't' + IntToStr(tempCount); // Pega o temp do segundo operando
+    eatToken(lexemes, i, type_token_unit._OR_);
+    
+    // Processa o operando direito
+    procAnd(lexemes, i);
+    rightTemp := 'temp' + IntToStr(tempCount - 1);
+    
+    // Gera código para a operação OR
+    resultTemp := 'temp' + IntToStr(tempCount);
     Inc(tempCount);
+    
     addIntermediateCode(arrayIntermediateCode,
-      buildOperationCode(OP_OR, newTemp(), temp1, temp2, 'boolean'));
+      buildOperationCode(OP_OR, resultTemp, leftTemp, rightTemp, 'boolean'));
+    
+    // Atualiza o operando esquerdo para possíveis operações OR seguintes
+    leftTemp := resultTemp;
   end;
 end;
 
@@ -586,20 +577,30 @@ end;
 
 procedure procAnd(lexemes: lexeme_array; var i: integer);
 var
-  temp1, temp2: string;
+  leftTemp, rightTemp, resultTemp: string;
 begin
+  // Processa o operando esquerdo (pode ser uma negação)
   procNot(lexemes, i);
-  temp1 := 't' + IntToStr(tempCount);
-  Inc(tempCount);
+  leftTemp := 'temp' + IntToStr(tempCount - 1); // Pega o último temp gerado
   
-  procRestAnd(lexemes, i);
-  
-  if (i < Length(lexemes)) and (lexemes[i].token_real = type_token_unit._AND_) then
+  // Verifica se há operadores AND seguintes
+  while (i <= High(lexemes)) and (lexemes[i].token_real = type_token_unit._AND_) do
   begin
-    temp2 := 't' + IntToStr(tempCount);
+    eatToken(lexemes, i, type_token_unit._AND_);
+    
+    // Processa o operando direito
+    procNot(lexemes, i);
+    rightTemp := 'temp' + IntToStr(tempCount - 1);
+    
+    // Gera código para a operação AND
+    resultTemp := 'temp' + IntToStr(tempCount);
     Inc(tempCount);
+    
     addIntermediateCode(arrayIntermediateCode,
-      buildOperationCode(OP_AND, newTemp(), temp1, temp2, 'boolean'));
+      buildOperationCode(OP_AND, resultTemp, leftTemp, rightTemp, 'boolean'));
+    
+    // Atualiza o operando esquerdo para possíveis operações AND seguintes
+    leftTemp := resultTemp;
   end;
 end;
 
@@ -615,19 +616,26 @@ end;
 
 procedure procNot(lexemes: lexeme_array; var i: integer);
 var
-  temp: string;
+  operandTemp, resultTemp: string;
 begin
   if lexemes[i].token_real = type_token_unit._NOT_ then
   begin
     eatToken(lexemes, i, type_token_unit._NOT_);
+    
+    // Processa o operando (que pode ser outro NOT ou relação)
     procNot(lexemes, i);
-    temp := 't' + IntToStr(tempCount);
+    operandTemp := 'temp' + IntToStr(tempCount - 1); // Pega o último temp
+    
+    // Gera código para a operação NOT
+    resultTemp := 'temp' + IntToStr(tempCount);
     Inc(tempCount);
+    
     addIntermediateCode(arrayIntermediateCode,
-      buildOperationCode(OP_NOT, newTemp(), temp, '', 'boolean'));
+      buildOperationCode(OP_NOT, resultTemp, operandTemp, '', 'boolean'));
   end
   else
   begin
+    // Se não for NOT, processa relações
     procRel(lexemes, i);
   end;
 end;
@@ -674,22 +682,26 @@ end;
 
 procedure procAdd(lexemes: lexeme_array; var i: integer);
 var
-  tempLeft: string;
+  leftTemp: string;
 begin
-  procMult(lexemes, i);  // Processa o lado esquerdo
-  tempLeft := 't' + IntToStr(tempCount); // Pega o temp do resultado
-  Inc(tempCount);
-  procRestAdd(lexemes, i, tempLeft); // Passa o temp como parâmetro
+  // Processa o operando esquerdo (de maior precedência)
+  procMult(lexemes, i);
+  
+  // Pega o último temporário gerado (não incrementa ainda)
+  leftTemp := 'temp' + IntToStr(tempCount - 1);
+  
+  // Processa as operações de adição/subtração restantes
+  procRestAdd(lexemes, i, leftTemp);
 end;
 
 procedure procRestAdd(lexemes: lexeme_array; var i: integer; leftTemp: string);
 var
-  op, tempRight, resultTemp: string;
+  op, rightTemp, resultTemp: string;
 begin
-  if (i < Length(lexemes)) and 
-     (lexemes[i].token_real in [type_token_unit._ADD_, type_token_unit._SUB_]) then
+  while (i <= High(lexemes)) and 
+        (lexemes[i].token_real in [type_token_unit._ADD_, type_token_unit._SUB_]) do
   begin
-    // Determina a operação
+    // Determina a operação (ADD ou SUB)
     if lexemes[i].token_real = type_token_unit._ADD_ then
       op := OP_ADD
     else
@@ -697,37 +709,44 @@ begin
     
     eatToken(lexemes, i, lexemes[i].token_real);
     
-    procMult(lexemes, i); // Processa o lado direito
-    tempRight := 't' + IntToStr(tempCount);
+    // Processa o operando direito (de maior precedência)
+    procMult(lexemes, i);
+    rightTemp := 'temp' + IntToStr(tempCount - 1);
+    
+    // Gera novo temporário para o resultado
+    resultTemp := 'temp' + IntToStr(tempCount);
     Inc(tempCount);
     
-    // Gera código intermediário
-    resultTemp := newTemp();
+    // Gera o código da operação
     addIntermediateCode(arrayIntermediateCode,
-      buildOperationCode(op, resultTemp, leftTemp, tempRight, 'integer'));
+      buildOperationCode(op, resultTemp, leftTemp, rightTemp, 'integer'));
     
-    // Processa mais operações (+ ou -) na mesma precedência
-    procRestAdd(lexemes, i, resultTemp);
+    // Atualiza o operando esquerdo para possíveis operações seguintes
+    leftTemp := resultTemp;
   end;
 end;
 
 procedure procMult(lexemes: lexeme_array; var i: integer);
 var
-  tempLeft: string;
+  leftTemp: string;
 begin
-  procUno(lexemes, i);  // Processa o lado esquerdo
-  tempLeft := 't' + IntToStr(tempCount);
-  Inc(tempCount);
-  procRestMult(lexemes, i, tempLeft); // Passa o temp como parâmetro
+  // Processa o operando esquerdo (unário)
+  procUno(lexemes, i);
+  
+  // Pega o último temporário gerado (sem incrementar ainda)
+  leftTemp := 'temp' + IntToStr(tempCount - 1);
+  
+  // Processa as operações de multiplicação/divisão restantes
+  procRestMult(lexemes, i, leftTemp);
 end;
 
 procedure procRestMult(lexemes: lexeme_array; var i: integer; leftTemp: string);
 var
-  op, tempRight, resultTemp: string;
+  op, rightTemp, resultTemp: string;
 begin
-  if (i < Length(lexemes)) and 
-     (lexemes[i].token_real in [type_token_unit._MUL_, type_token_unit._REAL_DIV_, 
-                               type_token_unit._MOD_, type_token_unit._INTER_DIV_]) then
+  while (i <= High(lexemes)) and 
+        (lexemes[i].token_real in [type_token_unit._MUL_, type_token_unit._REAL_DIV_, 
+                                 type_token_unit._MOD_, type_token_unit._INTER_DIV_]) do
   begin
     // Determina a operação
     case lexemes[i].token_real of
@@ -739,17 +758,20 @@ begin
     
     eatToken(lexemes, i, lexemes[i].token_real);
     
-    procUno(lexemes, i); // Processa o lado direito
-    tempRight := 't' + IntToStr(tempCount);
+    // Processa o operando direito (unário)
+    procUno(lexemes, i);
+    rightTemp := 'temp' + IntToStr(tempCount - 1);
+    
+    // Gera novo temporário para o resultado
+    resultTemp := 'temp' + IntToStr(tempCount);
     Inc(tempCount);
     
-    // Gera código intermediário
-    resultTemp := newTemp();
+    // Gera o código da operação
     addIntermediateCode(arrayIntermediateCode,
-      buildOperationCode(op, resultTemp, leftTemp, tempRight, 'integer'));
+      buildOperationCode(op, resultTemp, leftTemp, rightTemp, 'integer'));
     
-    // Processa mais operações (*, /, etc) na mesma precedência
-    procRestMult(lexemes, i, resultTemp);
+    // Atualiza o operando esquerdo para possíveis operações seguintes
+    leftTemp := resultTemp;
   end;
 end;
 
@@ -779,42 +801,36 @@ begin
   end
   else if lexemes[i].token_real in [_VARIABLE_, _DECIMAL_, _FLOAT_, _HEXADECIMAL_, _OCTAL_, _STRING_LITERAL_] then
   begin
-    tempName := newTemp(); // Cria um novo temporário
+    // Cria um novo temporário com numeração sequencial
+    tempName := 'temp' + IntToStr(tempCount);
+    Inc(tempCount);
     
+    // Determina o tipo baseado no token
     case lexemes[i].token_real of
       _VARIABLE_:
-      begin
         varType := 'var';
-        addIntermediateCode(arrayIntermediateCode,
-          buildAssignCode(tempName, lexemes[i].lex_text, varType));
-      end;
-      
       _DECIMAL_, _HEXADECIMAL_, _OCTAL_:
-      begin
-        addIntermediateCode(arrayIntermediateCode,
-          buildAssignCode(tempName, lexemes[i].lex_text, 'integer'));
-      end;
-      
+        varType := 'integer';
       _FLOAT_:
-      begin
-        addIntermediateCode(arrayIntermediateCode,
-          buildAssignCode(tempName, lexemes[i].lex_text, 'real'));
-      end;
-      
+        varType := 'real';
       _STRING_LITERAL_:
-      begin
-        addIntermediateCode(arrayIntermediateCode,
-          buildAssignCode(tempName, lexemes[i].lex_text, 'string'));
-      end;
+        varType := 'string';
     end;
+    
+    // Gera código de atribuição para o temporário
+    addIntermediateCode(arrayIntermediateCode,
+      buildAssignCode(tempName, lexemes[i].lex_text, varType));
     
     eatToken(lexemes, i, lexemes[i].token_real);
   end
   else
   begin
-    // Tratamento de erro (mantido do seu código original)
-    writeln(#10, 'Syntax Error: Unexpected token at line ', lexemes[i].line, ', column ', lexemes[i].column, '. The token: "', lexemes[i].lex_text, '" is not appropriate.');
-    writeln('The token: "', lexemes[i].lex_text, '" is a ', lexemes[i].token_real, ' type.', ' It should be a _STRING_LITERAL_, _VARIABLE_, _DECIMAL_, _FLOAT_, _HEXADECIMAL_ or _OCTAL_ type.', #10);
+    // Tratamento de erro melhorado
+    writeln(#10, 'Erro de sintaxe: Token inesperado na linha ', lexemes[i].line, 
+          ', coluna ', lexemes[i].column, '.');
+    writeln('Token: "', lexemes[i].lex_text, '"');
+    writeln('Tipo recebido: ', lexemes[i].token_real);
+    writeln('Tipos esperados: VARIABLE, DECIMAL, FLOAT, HEXADECIMAL, OCTAL ou STRING_LITERAL', #10);
     Halt(1);
   end;
 end;
