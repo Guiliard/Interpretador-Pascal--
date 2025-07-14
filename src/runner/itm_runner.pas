@@ -46,11 +46,9 @@ procedure ErrorAndExit(const msg: string);
 function UpdateOrAddString(var arr: SvalArray; const name, value: string): boolean;
 function UpdateOrAddInt(var arr: IvalArray; const name: string; value: integer): boolean;
 function UpdateOrAddFloat(var arr: FvalArray; const name: string; value: double): boolean;
-function FindVariableType(const name: string; var sarr: SvalArray; var iarr: IvalArray; var farr: FvalArray; var barr: BvalArray): string;
+function FindVariableType(const name: string; var sarr: SvalArray; var iarr: IvalArray; 
+                         var farr: FvalArray; var barr: BvalArray): string;
 procedure RunInstructions(arr: ItmArray);
-procedure ClearTempVariables(var iarr: IvalArray; var farr: FvalArray);
-procedure DeleteIntArrayElement(var arr: IvalArray; index: integer);
-procedure DeleteFloatArrayElement(var arr: FvalArray; index: integer);
 
 implementation
 
@@ -301,53 +299,6 @@ begin
              FindInFloatArray(farr, varName, dummyFloat));
 end;
 
-procedure ClearTempVariables(var iarr: IvalArray; var farr: FvalArray);
-var
-  i: integer;
-begin
-  // Limpa inteiros temporários
-  i := 0;
-  while i <= High(iarr) do
-  begin
-    if Pos('temp', iarr[i].fname) = 1 then
-    begin
-      DeleteIntArrayElement(iarr, i);
-    end
-    else
-      Inc(i);
-  end;
-
-  // Limpa floats temporários
-  i := 0;
-  while i <= High(farr) do
-  begin
-    if Pos('temp', farr[i].fname) = 1 then
-    begin
-      DeleteFloatArrayElement(farr, i);
-    end
-    else
-      Inc(i);
-  end;
-end;
-
-procedure DeleteIntArrayElement(var arr: IvalArray; index: integer);
-var
-  i: integer;
-begin
-  for i := index to High(arr)-1 do
-    arr[i] := arr[i+1];
-  SetLength(arr, Length(arr)-1);
-end;
-
-procedure DeleteFloatArrayElement(var arr: FvalArray; index: integer);
-var
-  i: integer;
-begin
-  for i := index to High(arr)-1 do
-    arr[i] := arr[i+1];
-  SetLength(arr, Length(arr)-1);
-end;
-
 procedure RunInstructions(arr: ItmArray);
 var
   i: LongInt;
@@ -379,6 +330,7 @@ var
   floatVal1, floatVal2: Double;
   isFloatOp: Boolean;
   tempFloat: Double;
+  opb1, opb2: boolean;
 begin
   SetLength(sarr, 0);
   SetLength(iarr, 0);
@@ -388,13 +340,13 @@ begin
   while i <= High(arr) do
   begin
     instr := arr[i];
-    WriteLn('Running Instruction ', i, ': ', instr.op);
-
-    if instr.arg1 = 'temp0' then
-      ClearTempVariables(iarr, farr);
+    // WriteLn('Running Instruction ', i, ': ', instr.op);
     
-    if instr.op = 'ASSIGN' then
+    if instr.op = 'ATT' then
     begin
+      if VariableExists(instr.arg1, sarr, iarr, farr) then
+        ErrorAndExit('Variável já existe: ' + instr.arg1);
+
       varType := FindVariableType(instr.arg1, sarr, iarr, farr, barr);
       
       if instr.arg_type = 'var' then
@@ -510,10 +462,7 @@ begin
           op1IsFloat := True;
         end
         else
-          intVal := tempInt;
-          if not FindInIntArray(iarr, instr.arg2, intVal) then
-            ErrorAndExit('Variável inteira não encontrada: ' + instr.arg2);
-          op1Value := intVal;
+          ErrorAndExit('Operando 1 inválido para ADD: ' + instr.arg2);
       end;
 
       // Processa o segundo operando (arg3)
@@ -556,13 +505,13 @@ begin
       begin
         resultFloat := op1Value + op2Value;
         UpdateOrAddFloat(farr, instr.arg1, resultFloat);
-        WriteLn('ADD: ', op1Value:0:2, ' + ', op2Value:0:2, ' = ', resultFloat:0:2, ' (float)');
+        //WriteLn('ADD: ', op1Value:0:2, ' + ', op2Value:0:2, ' = ', resultFloat:0:2, ' (float)');
       end
       else
       begin
         resultInt := Round(op1Value + op2Value);
         UpdateOrAddInt(iarr, instr.arg1, resultInt);
-        WriteLn('ADD: ', Round(op1Value), ' + ', Round(op2Value), ' = ', resultInt, ' (int)');
+        //WriteLn('ADD: ', Round(op1Value), ' + ', Round(op2Value), ' = ', resultInt, ' (int)');
       end;
     end
     else if instr.op = 'SUB' then
@@ -646,16 +595,16 @@ begin
       begin
         resultFloat := op1Value - op2Value;
         UpdateOrAddFloat(farr, instr.arg1, resultFloat);
-        WriteLn('SUB: ', op1Value:0:2, ' + ', op2Value:0:2, ' = ', resultFloat:0:2, ' (float)');
+        //WriteLn('SUB: ', op1Value:0:2, ' + ', op2Value:0:2, ' = ', resultFloat:0:2, ' (float)');
       end
       else
       begin
         resultInt := Round(op1Value - op2Value);
         UpdateOrAddInt(iarr, instr.arg1, resultInt);
-        WriteLn('SUB: ', Round(op1Value), ' + ', Round(op2Value), ' = ', resultInt, ' (int)');
+        //WriteLn('SUB: ', Round(op1Value), ' + ', Round(op2Value), ' = ', resultInt, ' (int)');
       end;
     end
-    else if instr.op = 'MUL' then
+    else if instr.op = 'MULT' then
     begin
       // Verifica se o destino (arg1) é uma variável válida (deve começar com letra)
       if (instr.arg1 = '') or (instr.arg1[1] in ['0'..'9']) then
@@ -736,13 +685,13 @@ begin
       begin
         resultFloat := op1Value * op2Value;
         UpdateOrAddFloat(farr, instr.arg1, resultFloat);
-        WriteLn('MULT: ', op1Value:0:2, ' + ', op2Value:0:2, ' = ', resultFloat:0:2, ' (float)');
+        //WriteLn('MULT: ', op1Value:0:2, ' + ', op2Value:0:2, ' = ', resultFloat:0:2, ' (float)');
       end
       else
       begin
         resultInt := Round(op1Value * op2Value);
         UpdateOrAddInt(iarr, instr.arg1, resultInt);
-        WriteLn('MULT: ', Round(op1Value), ' + ', Round(op2Value), ' = ', resultInt, ' (int)');
+        //WriteLn('MULT: ', Round(op1Value), ' + ', Round(op2Value), ' = ', resultInt, ' (int)');
       end;
     end
     else if instr.op = 'DIV' then
@@ -828,13 +777,13 @@ begin
       begin
         resultFloat := op1Value / op2Value;
         UpdateOrAddFloat(farr, instr.arg1, resultFloat);
-        WriteLn('DIV: ', op1Value:0:2, ' + ', op2Value:0:2, ' = ', resultFloat:0:2, ' (float)');
+        //WriteLn('DIV: ', op1Value:0:2, ' + ', op2Value:0:2, ' = ', resultFloat:0:2, ' (float)');
       end
       else
       begin
         resultInt := Round(op1Value / op2Value);
         UpdateOrAddInt(iarr, instr.arg1, resultInt);
-        WriteLn('ADD: ', Round(op1Value), ' + ', Round(op2Value), ' = ', resultInt, ' (int)');
+        //WriteLn('ADD: ', Round(op1Value), ' + ', Round(op2Value), ' = ', resultInt, ' (int)');
       end;
     end
     else if instr.op = 'IDIV' then
@@ -917,7 +866,7 @@ begin
 
       resultInt := Round(op1Value) div Round(op2Value);
       UpdateOrAddInt(iarr, instr.arg1, resultInt);
-      WriteLn('IDIV: ', Round(op1Value), ' + ', Round(op2Value), ' = ', resultInt, ' (int)');
+      //WriteLn('IDIV: ', Round(op1Value), ' + ', Round(op2Value), ' = ', resultInt, ' (int)');
     end
     else if instr.op = 'MOD' then
     begin
@@ -997,9 +946,9 @@ begin
       if (Round(op2Value) = 0) then
           ErrorAndExit('Divisão por zero não é permitido.');
 
-      resultInt := Round(op1Value) mod Round(op2Value);
+      resultInt := Round(op1Value) div Round(op2Value);
       UpdateOrAddInt(iarr, instr.arg1, resultInt);
-      WriteLn('MOD: ', Round(op1Value), ' + ', Round(op2Value), ' = ', resultInt, ' (int)');
+      //WriteLn('MOD: ', Round(op1Value), ' + ', Round(op2Value), ' = ', resultInt, ' (int)');
     end
     else if instr.op = 'LABEL' then
     begin
@@ -1074,7 +1023,7 @@ begin
           begin
             if not FindInStringArray(sarr, instr.arg2, strVal) then
               ErrorAndExit('Variável string não encontrada: ' + instr.arg2);
-            writeln(strVal); // Imprime o valor da string
+            write(strVal); // Imprime o valor da string
           end
           else if varType = 'int' then
           begin
@@ -1107,7 +1056,7 @@ begin
         tempStr := ''; // Variável temporária para leitura
           
         // Ler a entrada do usuário
-        ReadLn(tempStr);
+        read(tempStr);
           
         if varType = 'string' then
         begin
@@ -1216,10 +1165,28 @@ begin
           UpdateOrAddBool(barr, instr.arg1, intVal1 <> intVal2)
       end
     end
+    else if (instr.op = 'OR') or (instr.op = 'AND') or (instr.op = 'NOT') then
+    begin
+      if not FindInBoolArray(barr, instr.arg2, opb1) then
+        ErrorAndExit('Variável bool não encontrada: ' + instr.arg2);
+
+      if (instr.op <> 'NOT') then
+      begin
+        if not FindInBoolArray(barr, instr.arg3, opb1) then
+          ErrorAndExit('Variável bool não encontrada: ' + instr.arg3);
+      end;
+
+      if instr.op = 'OR' then
+        UpdateOrAddBool(barr, instr.arg1, opb1 or opb2)
+      else if instr.op = 'AND' then
+        UpdateOrAddBool(barr, instr.arg1, opb1 and opb2)
+      else
+        UpdateOrAddBool(barr, instr.arg1, not opb1)
+    end
     else if instr.op = 'IF' then
     begin
       if not FindInBoolArray(barr, instr.arg1, boolVal) then
-        ErrorAndExit('Variável bool não encontrada: ' + instr.arg2);
+        ErrorAndExit('Variável bool não encontrada: ' + instr.arg1);
 
       if (not boolVal) then
       begin
