@@ -110,9 +110,13 @@ begin
 
     line := Trim(line);
     if (line <> '') and (line[1] = '(') then 
+    begin
         Delete(line, 1, 1);
+    end
     if (line <> '') and (line[Length(line)] = ')') then 
+    begin
         Delete(line, Length(line), 1);
+    end
 
     p := 1;
     token := '';
@@ -142,32 +146,46 @@ begin
             Inc(p);
         end
         else
+        begin
             token := token + c;
+        end
     end;
 
     if (p <= 4) and (token <> '') then
+    begin
         raw_parts[p] := Trim(token);
+    end
 
     for i := 1 to 4 do
+    begin
         parts[i] := raw_parts[i];
+    end
 
     splitLine.arg_type := 'none';
   
     if (Length(parts[3]) >= 2) then
     begin
         if (parts[3][1] = '"') and (parts[3][Length(parts[3])] = '"') then
+        begin
             splitLine.arg_type := 'string'
+        end
         else 
         if (parts[3][1] = '''') and (parts[3][Length(parts[3])] = '''') then
+        begin
             splitLine.arg_type := 'var';
+        end
     end
     else 
     if isNumeric(parts[3], isFloat) then
     begin
         if isFloat then
+        begin
             splitLine.arg_type := 'float'
+        end
         else
+        begin
             splitLine.arg_type := 'integer';
+        end
     end;
 
     for i := 1 to 4 do
@@ -175,7 +193,9 @@ begin
         if (Length(parts[i]) >= 2) then
         begin
             if (parts[i][1] in ['''', '"']) and (parts[i][Length(parts[i])] = parts[i][1]) then
+            begin
                 parts[i] := Copy(parts[i], 2, Length(parts[i]) - 2);
+            end
         end;
     end;
 

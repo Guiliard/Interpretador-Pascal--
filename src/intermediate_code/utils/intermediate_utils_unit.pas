@@ -82,12 +82,16 @@ begin
                 actualType := 'integer';
         end
         else
-        actualType := varType;
+        begin
+            actualType := varType;
+        end
     end
     else
+    begin
         actualType := varType;
+    end
 
-  buildAssignCode := buildOperationCode(OP_ASSIGN, varName, value, '', actualType);
+    buildAssignCode := buildOperationCode(OP_ASSIGN, varName, value, '', actualType);
 end;
 
 function buildWriteCode(value: string; valueType: string): intermediate_code;
