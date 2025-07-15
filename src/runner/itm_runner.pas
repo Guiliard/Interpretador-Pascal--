@@ -3,488 +3,408 @@ unit itm_runner;
 interface
 
 uses 
-	SysUtils, 
-  	itm_analyzer;
+    SysUtils, itm_analyzer;
 
 type
-  	LabelInst = record
-    	fname: string;
-    	line: LongInt;
-  	end;
+  LabelInst = record
+    fname: string;
+    line: LongInt;
+  end;
 
-  	StringVal = record
-    	sname: string;
-   		sval: string;
-  	end;
+  StringVal = record
+    sname: string;
+    sval: string;
+  end;
 
-  	IntVal = record
-    	fname: string;
-    	fval: integer;
-  	end;
+  IntVal = record
+    fname: string;
+    fval: integer;
+  end;
 
-  	FloatVal = record
-    	fname: string;
-    	fval: single;
-  	end;
+  FloatVal = record
+    fname: string;
+    fval: single;
+  end;
 
-  	BinVal = record
-    	fname: string;
-    	fval: boolean;
-  	end;
+  BinVal = record
+    fname: string;
+    fval: boolean;
+  end;
 
-	LinstArray = array of LabelInst;
-	SvalArray = array of StringVal;
-	IvalArray = array of IntVal;
-	FvalArray = array of FloatVal;
-	BvalArray = array of BinVal;
+  LinstArray = array of LabelInst;
+  SvalArray = array of StringVal;
+  IvalArray = array of IntVal;
+  FvalArray = array of FloatVal;
+  BvalArray = array of BinVal;
 
 procedure appendl(var arr: LinstArray; novo: LabelInst);
 procedure appends(var arr: SvalArray; novo: StringVal);
 procedure appendi(var arr: IvalArray; novo: IntVal);
 procedure appendf(var arr: FvalArray; novo: FloatVal);
 procedure appendb(var arr: BvalArray; novo: BinVal);
-function updateOrAddString(var arr: SvalArray; const name, value: string): boolean;
-function updateOrAddInt(var arr: IvalArray; const name: string; value: integer): boolean;
-function updateOrAddFloat(var arr: FvalArray; const name: string; value: double): boolean;
-function findVariableType(const name: string; var sarr: SvalArray; var iarr: IvalArray; var farr: FvalArray; var barr: BvalArray): string;
-procedure errorAndExit(const msg: string);
-procedure runInstructions(arr: ItmArray);
+procedure ErrorAndExit(const msg: string);
+function UpdateOrAddString(var arr: SvalArray; const name, value: string): boolean;
+function UpdateOrAddInt(var arr: IvalArray; const name: string; value: integer): boolean;
+function UpdateOrAddFloat(var arr: FvalArray; const name: string; value: double): boolean;
+function FindVariableType(const name: string; var sarr: SvalArray; var iarr: IvalArray; 
+                         var farr: FvalArray; var barr: BvalArray): string;
+procedure RunInstructions(arr: ItmArray);
 
 implementation
 
 procedure appendl(var arr: LinstArray; novo: LabelInst);
 var
-	n: Integer;
+  n: Integer;
 begin
-	n := Length(arr);
-	SetLength(arr, n + 1);
-	arr[n] := novo;
+  n := Length(arr);
+  SetLength(arr, n + 1);
+  arr[n] := novo;
 end;
 
 procedure appends(var arr: SvalArray; novo: StringVal);
 var
-	n: Integer;
+  n: Integer;
 begin
-	n := Length(arr);
-	SetLength(arr, n + 1);
-	arr[n] := novo;
+  n := Length(arr);
+  SetLength(arr, n + 1);
+  arr[n] := novo;
 end;
 
 procedure appendi(var arr: IvalArray; novo: IntVal);
 var
-  	n: Integer;
+  n: Integer;
 begin
-	n := Length(arr);
-	SetLength(arr, n + 1);
-	arr[n] := novo;
+  n := Length(arr);
+  SetLength(arr, n + 1);
+  arr[n] := novo;
 end;
 
 procedure appendf(var arr: FvalArray; novo: FloatVal);
 var
-  	n: Integer;
+  n: Integer;
 begin
-	n := Length(arr);
-	SetLength(arr, n + 1);
-	arr[n] := novo;
+  n := Length(arr);
+  SetLength(arr, n + 1);
+  arr[n] := novo;
 end;
 
 procedure appendb(var arr: BvalArray; novo: BinVal);
 var
-  	n: Integer;
+  n: Integer;
 begin
-	n := Length(arr);
-	SetLength(arr, n + 1);
-	arr[n] := novo;
+  n := Length(arr);
+  SetLength(arr, n + 1);
+  arr[n] := novo;
 end;
 
-function updateOrAddString(var arr: SvalArray; const name, value: string): boolean;
-var
-  	i: integer;
-  	novo: StringVal;
+procedure ErrorAndExit(const msg: string);
 begin
-  	updateOrAddString := false;
-  	for i := 0 to High(arr) do
-  	begin
-    	if arr[i].sname = name then
-    	begin
-      		arr[i].sval := value;
-      		updateOrAddString := true;
-      		Exit;
-    	end;
-  	end;
+  WriteLn('ERRO: ', msg);
+  Halt(1); // Encerra o programa com código de erro
+end;
+
+function UpdateOrAddString(var arr: SvalArray; const name, value: string): boolean;
+var
+  i: integer;
+  novo: StringVal;
+begin
+  UpdateOrAddString := false;
+  for i := 0 to High(arr) do
+  begin
+    if arr[i].sname = name then
+    begin
+      arr[i].sval := value;
+      UpdateOrAddString := true;
+      Exit;
+    end;
+  end;
   
-	novo.sname := name;
-	novo.sval := value;
-	appends(arr, novo);
-	updateOrAddString := true;
+  novo.sname := name;
+  novo.sval := value;
+  appends(arr, novo);
+  UpdateOrAddString := true;
 end;
 
-function updateOrAddInt(var arr: IvalArray; const name: string; value: integer): boolean;
+function UpdateOrAddInt(var arr: IvalArray; const name: string; value: integer): boolean;
 var
-	i: integer;
-	novo: IntVal;
+  i: integer;
+  novo: IntVal;
 begin
-  	updateOrAddInt := false;
-  	for i := 0 to High(arr) do
-  	begin
-    	if arr[i].fname = name then
-    	begin
-			arr[i].fval := value;
-			updateOrAddInt := true;
-			Exit;
-    	end;
-  	end;
+  UpdateOrAddInt := false;
+  for i := 0 to High(arr) do
+  begin
+    if arr[i].fname = name then
+    begin
+      arr[i].fval := value;
+      UpdateOrAddInt := true;
+      Exit;
+    end;
+  end;
 
-	novo.fname := name;
-	novo.fval := value;
-	appendi(arr, novo);
-	updateOrAddInt := true;
+  novo.fname := name;
+  novo.fval := value;
+  appendi(arr, novo);
+  UpdateOrAddInt := true;
 end;
 
-function updateOrAddFloat(var arr: FvalArray; const name: string; value: double): boolean;
+function UpdateOrAddFloat(var arr: FvalArray; const name: string; value: double): boolean;
 var
-  	i: integer;
-  	novo: FloatVal;
+  i: integer;
+  novo: FloatVal;
 begin
-  	updateOrAddFloat := false;
-  	for i := 0 to High(arr) do
-  	begin
-    	if arr[i].fname = name then
-    	begin
-      		arr[i].fval := value;
-      		updateOrAddFloat := true;
-      		Exit;
-    	end;
-  	end;
+  UpdateOrAddFloat := false;
+  for i := 0 to High(arr) do
+  begin
+    if arr[i].fname = name then
+    begin
+      arr[i].fval := value;
+      UpdateOrAddFloat := true;
+      Exit;
+    end;
+  end;
   
-	novo.fname := name;
-	novo.fval := value;
-	appendf(arr, novo);
-	updateOrAddFloat := true;
+  novo.fname := name;
+  novo.fval := value;
+  appendf(arr, novo);
+  UpdateOrAddFloat := true;
 end;
 
-function updateOrAddBool(var arr: BvalArray; const name: string; value: boolean): boolean;
+function UpdateOrAddBool(var arr: BvalArray; const name: string; value: boolean): boolean;
 var
-	i: integer;
-	novo: BinVal;
+  i: integer;
+  novo: BinVal;
 begin
-  	updateOrAddBool := false;
-  	for i := 0 to High(arr) do
-  	begin
-    	if arr[i].fname = name then
-    	begin
-      		arr[i].fval := value;
-      		updateOrAddBool := true;
-      		Exit;
-    	end;
-  	end;
+  UpdateOrAddBool := false;
+  for i := 0 to High(arr) do
+  begin
+    if arr[i].fname = name then
+    begin
+      arr[i].fval := value;
+      UpdateOrAddBool := true;
+      Exit;
+    end;
+  end;
   
-	novo.fname := name;
-	novo.fval := value;
-	appendb(arr, novo);
-	updateOrAddBool := true;
+  novo.fname := name;
+  novo.fval := value;
+  appendb(arr, novo);
+  UpdateOrAddBool := true;
 end;
 
-function findVariableType(const name: string; var sarr: SvalArray; var iarr: IvalArray; var farr: FvalArray; var barr: BvalArray): string;
+function FindVariableType(const name: string; var sarr: SvalArray; var iarr: IvalArray; 
+                         var farr: FvalArray; var barr: BvalArray): string;
 var
-	i: integer;
+  i: integer;
 begin
-	for i := 0 to High(sarr) do
-	begin
-    	if sarr[i].sname = name then 
-		begin	
-			Exit('string');
-		end
-	end
+  // Verifica em todos os arrays e retorna o tipo da variável
+  for i := 0 to High(sarr) do
+    if sarr[i].sname = name then Exit('string');
   
-  	for i := 0 to High(iarr) do
-	begin
-    	if iarr[i].fname = name then 
-		begin 
-			Exit('int');
-		end
-	end
+  for i := 0 to High(iarr) do
+    if iarr[i].fname = name then Exit('int');
   
-  	for i := 0 to High(farr) do
-	begin
-    	if farr[i].fname = name then 
-		begin
-			Exit('float');
-		end
-	end
+  for i := 0 to High(farr) do
+    if farr[i].fname = name then Exit('float');
   
-  	for i := 0 to High(barr) do
-	begin
-    	if barr[i].fname = name then 
-		begin
-			Exit('bool');
-		end
-	end
+  for i := 0 to High(barr) do
+    if barr[i].fname = name then Exit('bool');
   
-  	findVariableType := '';
+  FindVariableType := ''; // Não encontrado
 end;
 
-function findInStringArray(const arr: SvalArray; const name: string; var value: string): boolean;
+function FindInStringArray(const arr: SvalArray; const name: string; var value: string): boolean;
 var
-	i: integer;
+  i: integer;
 begin
-  	for i := 0 to High(arr) do
-	begin
-    	if arr[i].sname = name then
-    	begin
-      		value := arr[i].sval;
-      		Exit(true);
-		end
-    end
-
-  	findInStringArray := false;
+  for i := 0 to High(arr) do
+    if arr[i].sname = name then
+    begin
+      value := arr[i].sval;
+      Exit(true);
+    end;
+  FindInStringArray := false;
 end;
 
-function findInLabelArray(const arr: LinstArray; const name: string): LongInt;
+function FindInLabelArray(const arr: LinstArray; const name: string): LongInt;
 var
-	i: integer;
+  i: integer;
 begin
-  	for i := 0 to High(arr) do
-	begin
-    	if arr[i].fname = name then
-    	begin
-      		Exit(arr[i].line);
-    	end
-	end
-
-  	findInLabelArray := -1;
+  for i := 0 to High(arr) do
+    if arr[i].fname = name then
+    begin
+      Exit(arr[i].line);
+    end;
+  FindInLabelArray := -1;
 end;
 
-function findLabelAfter(const arr: ItmArray; const name: string; var j: LongInt): LongInt;
+function FindLabelAfter(const arr: ItmArray; const name: string; var j: LongInt): LongInt;
 var
-  	i: LongInt;
+  i: LongInt;
 begin
-  	for i := j to High(arr) do
-	begin
-    	if (arr[i].op = 'LABEL') and (arr[i].arg1 = name) then
-    	begin
-      		Exit(i);
-    	end
-	end
-
-  	findLabelAfter := -1;
+  for i := j to High(arr) do
+    if (arr[i].op = 'LABEL') and (arr[i].arg1 = name) then
+    begin
+      Exit(i);
+    end;
+  FindLabelAfter := -1;
 end;
 
-function findInIntArray(const arr: IvalArray; const name: string; var value: integer): boolean;
+function FindInIntArray(const arr: IvalArray; const name: string; var value: integer): boolean;
 var
-  	i: integer;
+  i: integer;
 begin
-  	for i := 0 to High(arr) do
-	begin
-    	if arr[i].fname = name then
-    	begin
-      		value := arr[i].fval;
-      		Exit(true);
-		end
-    end
-
-  	findInIntArray := false;
+  for i := 0 to High(arr) do
+    if arr[i].fname = name then
+    begin
+      value := arr[i].fval;
+      Exit(true);
+    end;
+  FindInIntArray := false;
 end;
 
-function findInBoolArray(const arr: BvalArray; const name: string; var value: boolean): boolean;
+function FindInBoolArray(const arr: BvalArray; const name: string; var value: boolean): boolean;
 var
-	i: integer;
+  i: integer;
 begin
-  	for i := 0 to High(arr) do
-	begin
-    	if arr[i].fname = name then
-    	begin
-      		value := arr[i].fval;
-      		Exit(true);
-    	end
-	end
-
-  	findInBoolArray := false;
+  for i := 0 to High(arr) do
+    if arr[i].fname = name then
+    begin
+      value := arr[i].fval;
+      Exit(true);
+    end;
+  FindInBoolArray := false;
 end;
 
-function findInFloatArray(const arr: FvalArray; const name: string; var value: Double): boolean;
+function FindInFloatArray(const arr: FvalArray; const name: string; var value: Double): boolean;
 var
-  	i: integer;
+  i: integer;
 begin
-  	for i := 0 to High(arr) do
-	begin
-    	if arr[i].fname = name then
-    	begin
-      		value := arr[i].fval;
-      		Exit(true);
-    	end
-	end
-
-  	findInFloatArray := false;
+  for i := 0 to High(arr) do
+    if arr[i].fname = name then
+    begin
+      value := arr[i].fval;
+      Exit(true);
+    end;
+  FindInFloatArray := false;
 end;
 
-function variableExists(varName: string; const sarr: SvalArray; const iarr: IvalArray; const farr: FvalArray): Boolean;
+function VariableExists(varName: string; const sarr: SvalArray; const iarr: IvalArray; const farr: FvalArray): Boolean;
 var
-  	dummyStr: string;
-  	dummyInt: SmallInt;
-  	dummyFloat: Double;
+  dummyStr: string;
+  dummyInt: SmallInt;
+  dummyFloat: Double;
 begin
-  	variableExists := (FindInStringArray(sarr, varName, dummyStr) or FindInIntArray(iarr, varName, dummyInt) or FindInFloatArray(farr, varName, dummyFloat));
-end;
-
-procedure errorAndExit(const msg: string);
-begin
-	WriteLn('ERRO: ', msg);
-	Halt(1);
+  VariableExists := (FindInStringArray(sarr, varName, dummyStr) or 
+             FindInIntArray(iarr, varName, dummyInt) or
+             FindInFloatArray(farr, varName, dummyFloat));
 end;
 
 procedure RunInstructions(arr: ItmArray);
 var
-	i: LongInt;
-	instr: ItmInstruction;
-	larr: LinstArray;
-	sarr: SvalArray;
-	iarr: IvalArray;
-	farr: FvalArray;
-	barr: BvalArray;
-	lnovo: LabelInst;
-	varType: string;
-	floatValue: Double = 0.0;
-	sourceType: string;
-	strVal: string;
-	intVal: SmallInt = 0;
-	tempInt: LongInt = 0;
-	op1Value: Double;
-	op2Value: Double;
-	op1IsFloat: Boolean;
-	op2IsFloat: Boolean;
-	op1Type: string;
-	op2Type: string;
-	resultIsFloat: Boolean;
-	resultInt: integer;
-	resultFloat: Double;
-	tempStr: string;
-	boolVal: boolean;
-	intVal1, intVal2: integer;
-	floatVal1, floatVal2: Double;
-	isFloatOp: Boolean;
-	tempFloat: Double;
-	opb1, opb2: boolean;
+  i: LongInt;
+  instr: ItmInstruction;
+  larr: LinstArray;
+  sarr: SvalArray;
+  iarr: IvalArray;
+  farr: FvalArray;
+  barr: BvalArray;
+  lnovo: LabelInst;
+  varType: string;
+  floatValue: Double = 0.0;
+  sourceType: string;
+  strVal: string;
+  intVal: SmallInt = 0;  // Alterado para SmallInt
+  tempInt: LongInt = 0; // Variável temporária para conversão
+  op1Value: Double;
+  op2Value: Double;
+  op1IsFloat: Boolean;
+  op2IsFloat: Boolean;
+  op1Type: string;
+  op2Type: string;
+  resultIsFloat: Boolean;
+  resultInt: integer;
+  resultFloat: Double;
+  tempStr: string;
+  boolVal: boolean;
+  intVal1, intVal2: integer;
+  floatVal1, floatVal2: Double;
+  isFloatOp: Boolean;
+  tempFloat: Double;
+  opb1, opb2: boolean;
 begin
-	SetLength(sarr, 0);
-	SetLength(iarr, 0);
-	SetLength(farr, 0);
-	SetLength(larr, 0);
-	i := 0;
-  	while i <= High(arr) do
-  	begin
-    	instr := arr[i];
+  SetLength(sarr, 0);
+  SetLength(iarr, 0);
+  SetLength(farr, 0);
+  SetLength(larr, 0);
+  i := 0;
+  while i <= High(arr) do
+  begin
+    instr := arr[i];
+    // WriteLn('Running Instruction ', i, ': ', instr.op);
     
-    	if instr.op = 'ATT' then
-    	begin
-      		if variableExists(instr.arg1, sarr, iarr, farr) then
-			begin
-        		errorAndExit('Variável já existe: ' + instr.arg1);
-			end
-		end
-			
-      	varType := findVariableType(instr.arg1, sarr, iarr, farr, barr);
+    if instr.op = 'ATT' then
+    begin
+      if VariableExists(instr.arg1, sarr, iarr, farr) then
+        ErrorAndExit('Variável já existe: ' + instr.arg1);
+
+      varType := FindVariableType(instr.arg1, sarr, iarr, farr, barr);
       
-      	if instr.arg_type = 'var' then
-      	begin
-        	sourceType := FindVariableType(instr.arg2, sarr, iarr, farr, barr);
+      if instr.arg_type = 'var' then
+      begin
+        // Atribuição de variável para variável
+        sourceType := FindVariableType(instr.arg2, sarr, iarr, farr, barr);
         
-			if sourceType = '' then
-			begin
-				errorAndExit('Variável fonte não encontrada: ' + instr.arg2);
-			end
+        if sourceType = '' then
+          ErrorAndExit('Variável fonte não encontrada: ' + instr.arg2);
         
-			if sourceType = 'string' then
-			begin
-				if not FindInStringArray(sarr, instr.arg2, strVal) then
-				begin
-					errorAndExit('Erro interno: string não encontrada');
-				end
-				
-				if varType = '' then
-				begin
-					updateOrAddString(sarr, instr.arg1, strVal)
-				end
-				else 
-				if varType = 'string' then
-				begin
-					updateOrAddString(sarr, instr.arg1, strVal)
-				end
-				else
-				begin
-					errorAndExit('Tipo incompatível: não pode atribuir string para ' + varType);
-				end
-			end
-
-			else 
-			if sourceType = 'int' then
-			begin
-				if not FindInIntArray(iarr, instr.arg2, intVal) then
-				begin
-					errorAndExit('Erro interno: int não encontrado');
-				end
-			
-				if varType = '' then
-				begin
-					updateOrAddInt(iarr, instr.arg1, intVal)
-				end
-
-				else 
-				if varType = 'int' then
-				begin
-					updateOrAddInt(iarr, instr.arg1, intVal)
-				end
-
-				else 
-				if varType = 'float' then
-				begin
-					updateOrAddFloat(farr, instr.arg1, intVal)
-				end
-				else
-				begin
-					errorAndExit('Tipo incompatível: não pode atribuir int para ' + varType);
-				end
-			end
-
-			else 
-			if sourceType = 'float' then
-			begin
-				if not FindInFloatArray(farr, instr.arg2, floatValue) then
-				begin
-					errorAndExit('Erro interno: float não encontrado');
-				end
-			
-				if varType = '' then
-				begin
-					updateOrAddFloat(farr, instr.arg1, floatValue)
-				end
-				else 
-				if varType = 'int' then
-				begin
-					updateOrAddInt(iarr, instr.arg1, Round(floatValue))
-				end
-				else 
-				if varType = 'float' then
-				begin
-					updateOrAddFloat(farr, instr.arg1, floatValue)
-				end
-				else
-				begin
-					errorAndExit('Tipo incompatível: não pode atribuir int para ' + varType);
-				end
-			end
-      	end
-
-      	else 
-		if instr.arg_type = 'string' then
-      	begin
-			if (varType <> '') and (varType <> 'string') then
-			begin
-				errorAndExit('Tipo incompatível: não pode atribuir string para ' + varType);
-			end
+        if sourceType = 'string' then
+        begin
+          if not FindInStringArray(sarr, instr.arg2, strVal) then
+            ErrorAndExit('Erro interno: string não encontrada');
+            
+          if varType = '' then
+            UpdateOrAddString(sarr, instr.arg1, strVal)
+          else if varType = 'string' then
+            UpdateOrAddString(sarr, instr.arg1, strVal)
+          else
+            ErrorAndExit('Tipo incompatível: não pode atribuir string para ' + varType);
+        end
+        else if sourceType = 'int' then
+        begin
+          if not FindInIntArray(iarr, instr.arg2, intVal) then
+            ErrorAndExit('Erro interno: int não encontrado');
           
-        	updateOrAddString(sarr, instr.arg1, instr.arg2);
-      	end
+          if varType = '' then
+            UpdateOrAddInt(iarr, instr.arg1, intVal)
+          else if varType = 'int' then
+            UpdateOrAddInt(iarr, instr.arg1, intVal)
+          else if varType = 'float' then
+            UpdateOrAddFloat(farr, instr.arg1, intVal)
+          else
+            ErrorAndExit('Tipo incompatível: não pode atribuir int para ' + varType);
+        end
+        else if sourceType = 'float' then
+        begin
+          if not FindInFloatArray(farr, instr.arg2, floatValue) then
+            ErrorAndExit('Erro interno: float não encontrado');
+          
+          if varType = '' then
+            UpdateOrAddFloat(farr, instr.arg1, floatValue)
+          else if varType = 'int' then
+            UpdateOrAddInt(iarr, instr.arg1, Round(floatValue))
+          else if varType = 'float' then
+            UpdateOrAddFloat(farr, instr.arg1, floatValue)
+          else
+            ErrorAndExit('Tipo incompatível: não pode atribuir int para ' + varType);
+        end;
+      end
+      else if instr.arg_type = 'string' then
+      begin
+        if (varType <> '') and (varType <> 'string') then
+          ErrorAndExit('Tipo incompatível: não pode atribuir string para ' + varType);
+          
+        UpdateOrAddString(sarr, instr.arg1, instr.arg2);
+      end
       else if TryStrToInt(instr.arg2, tempInt) then
       begin
         intVal := SmallInt(tempInt); // Conversão explícita
