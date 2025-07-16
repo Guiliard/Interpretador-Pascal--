@@ -4,161 +4,258 @@ interface
 
 uses 
     intermediate_code_unit,
-    type_token_unit,
-    lexeme_unit,
     SysUtils;
 
-const
-    OP_ASSIGN = 'ASSIGN';
-    OP_ADD = 'ADD';
-    OP_SUB = 'SUB';
-    OP_MUL = 'MUL';
-    OP_DIV = 'DIV';
-    OP_IDIV = 'IDIV';
-    OP_MOD = 'MOD';
-    OP_AND = 'AND';
-    OP_OR = 'OR';
-    OP_NOT = 'NOT';
-    OP_EQ = 'EQ';
-    OP_NE = 'NEQ';
-    OP_LT = 'LESS';
-    OP_LE = 'LEQ';
-    OP_GT = 'GRET';
-    OP_GE = 'GEQ';
-    OP_WRITE = 'WRITE';
-    OP_READ = 'READ';
-    OP_LABEL = 'LABEL';
-    OP_IF = 'IF';
-    OP_JUMP = 'JUMP';
-    OP_FOR = 'FOR';
-    OP_WHILE = 'WHILE';
+function genATT(salvo, valor: string): intermediate_code;
+function genSUB(salvo, op1, op2: string): intermediate_code;
+function genADD(salvo, op1, op2: string): intermediate_code;
+function genIF(cond, labelVdd, labelFalso: string): intermediate_code;
+function genJUMP(label_: string): intermediate_code;
+function genLABEL(nomeLabel: string): intermediate_code;
 
-type
-    TIntermediateCodeArray = array of intermediate_code;
+function genEQ(salvo, op1, op2: string): intermediate_code;
+function genNEQ(salvo, op1, op2: string): intermediate_code;
+function genLEQ(salvo, op1, op2: string): intermediate_code;
+function genLESS(salvo, op1, op2: string): intermediate_code;
+function genGEQ(salvo, op1, op2: string): intermediate_code;
+function genGRET(salvo, op1, op2: string): intermediate_code;
 
-function buildOperationCode(opType: string; dest: string; op1: string; op2: string; operandType: string): intermediate_code;
-function buildAssignCode(varName: string; value: string; varType: string): intermediate_code;
-function buildWriteCode(value: string; valueType: string): intermediate_code;
-function buildReadCode(varName: string): intermediate_code;
-function buildLabelCode(labelName: string): intermediate_code;
-function buildIfCode(condition: string; thenLabel: string; elseLabel: string): intermediate_code;
-function buildJumpCode(labelName: string): intermediate_code;
-procedure addIntermediateCode(var arrayIntermediateCode: TIntermediateCodeArray; const newCode: intermediate_code);
-function newTemp(): string;
-function newLabel(): string;
-procedure printIntermediateCode(const codeArray: TIntermediateCodeArray);
+function genMULT(salvo, op1, op2: string): intermediate_code;
+function genRDIV(salvo, op1, op2: string): intermediate_code;
+function genIDIV(salvo, op1, op2: string): intermediate_code;
+function genMOD(salvo, op1, op2: string): intermediate_code;
+
+function genCALL_READ(salvo: string): intermediate_code;
+function genCALL_WRITE(escrito: string): intermediate_code;
+
+function genOR(salvo, op1, op2: string): intermediate_code;
+function genAND(salvo, op1, op2: string): intermediate_code;
+function genNOT(salvo, op1: string): intermediate_code;
+
+procedure printArrayCode(arrayCode: intermediate_code_array);
+procedure addIntermediateCode(var arrayCode: intermediate_code_array; code: intermediate_code);
+procedure updateIntermediateCode(var arrayCode: intermediate_code_array; i: Integer; valor: string; opType: string);
+
+function genNewTemp(var flagNewTemp: Integer): string;
 
 implementation
 
-var
-    tempCount: Integer = 0;
-    labelCount: Integer = 0;
-
-function buildOperationCode(opType: string; dest: string; op1: string; op2: string; operandType: string): intermediate_code;
+function newCode(code_type, op1, op2, op3, op_type: string): intermediate_code;
+var 
+    code: intermediate_code;
 begin
-    buildOperationCode.code_type := opType;
-    buildOperationCode.op1 := dest;
-    buildOperationCode.op2 := op1;
-    buildOperationCode.op3 := op2;
-    buildOperationCode.op_type := operandType;
+    code.code_type := code_type;
+    code.op1 := op1;
+    code.op2 := op2;
+    code.op3 := op3;
+    code.op_type := op_type;
+    Exit(code);
 end;
 
-function buildAssignCode(varName: string; value: string; varType: string): intermediate_code;
-var
-    actualType: string;
+function genATT(salvo, valor: string): intermediate_code;
+var 
+    code: intermediate_code;
 begin
-    if (Length(value) >= 2) and (value[1] = '"') and (value[Length(value)] = '"') then
-    begin
-        actualType := 'string';
-    end
-    else 
-    if (varType = 'var') and (value <> '') then
-    begin
-    if value[1] in ['0'..'9'] then
-        begin
-            if Pos('.', value) > 0 then
-                actualType := 'float'
-            else
-                actualType := 'integer';
-        end
-        else
-        begin
-            actualType := varType;
-        end
-    end
-    else
-    begin
-        actualType := varType;
-    end
-
-    buildAssignCode := buildOperationCode(OP_ASSIGN, varName, value, '', actualType);
+    code := newCode('ATT', salvo, valor, 'NONE', '');
+    Exit(code);
 end;
 
-function buildWriteCode(value: string; valueType: string): intermediate_code;
+function genSUB(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
 begin
-    buildWriteCode := buildOperationCode(OP_WRITE, '', value, '', valueType);
+    code := newCode('SUB', salvo, op1, op2, '');
+    Exit(code);
 end;
 
-function buildReadCode(varName: string): intermediate_code;
+function genADD(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
 begin
-    buildReadCode := buildOperationCode(OP_READ, varName, '', '', 'var');
+    code := newCode('ADD', salvo, op1, op2, '');
+    Exit(code);
 end;
 
-function buildLabelCode(labelName: string): intermediate_code;
+function genIF(cond, labelVdd, labelFalso: string): intermediate_code;
+var 
+    code: intermediate_code;
 begin
-    buildLabelCode := buildOperationCode(OP_LABEL, labelName, '', '', 'none');
+    code := newCode('IF', cond, labelVdd, labelFalso, '');
+    Exit(code);
 end;
 
-function buildIfCode(condition: string; thenLabel: string; elseLabel: string): intermediate_code;
+function genJUMP(label_: string): intermediate_code;
+var 
+    code: intermediate_code;
 begin
-    buildIfCode := buildOperationCode(OP_IF, condition, thenLabel, elseLabel, 'none');
+    code := newCode('JUMP', label_, 'NONE', 'NONE', '');
+    Exit(code);
 end;
 
-function buildJumpCode(labelName: string): intermediate_code;
+function genLABEL(nomeLabel: string): intermediate_code;
+var 
+    code: intermediate_code;
 begin
-    buildJumpCode := buildOperationCode(OP_JUMP, labelName, '', '', 'none');
+    code := newCode('LABEL', nomeLabel, 'NONE', 'NONE', '');
+    Exit(code);
 end;
 
-procedure addIntermediateCode(var arrayIntermediateCode: TIntermediateCodeArray; const newCode: intermediate_code);
+function genEQ(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
 begin
-    SetLength(arrayIntermediateCode, Length(arrayIntermediateCode) + 1);
-    arrayIntermediateCode[High(arrayIntermediateCode)] := newCode;
+    code := newCode('EQ', salvo, op1, op2, '');
+    Exit(code);
 end;
 
-function newTemp(): string;
+function genNEQ(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
 begin
-    Inc(tempCount);
-    newTemp := 't' + IntToStr(tempCount);
+    code := newCode('NEQ', salvo, op1, op2, '');
+    Exit(code);
 end;
 
-function newLabel(): string;
+function genLEQ(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
 begin
-    Inc(labelCount);
-    newLabel := 'L' + IntToStr(labelCount);
+    code := newCode('LEQ', salvo, op1, op2, '');
+    Exit(code);
 end;
 
-procedure printIntermediateCode(const codeArray: TIntermediateCodeArray);
-var
+function genLESS(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
+begin
+    code := newCode('LESS', salvo, op1, op2, '');
+    Exit(code);
+end;
+
+function genGEQ(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
+begin
+    code := newCode('GEQ', salvo, op1, op2, '');
+    Exit(code);
+end;
+
+function genGRET(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
+begin
+    code := newCode('GRET', salvo, op1, op2, '');
+    Exit(code);
+end;
+
+function genMULT(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
+begin
+    code := newCode('MULT', salvo, op1, op2, '');
+    Exit(code);
+end;
+
+function genRDIV(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
+begin
+    code := newCode('REAL_DIV', salvo, op1, op2, '');
+    Exit(code);
+end;
+
+function genIDIV(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
+begin
+    code := newCode('INTER_DIV', salvo, op1, op2, '');
+    Exit(code);
+end;
+
+function genMOD(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
+begin
+    code := newCode('MOD', salvo, op1, op2, '');
+    Exit(code);
+end;
+
+function genCALL_READ(salvo: string): intermediate_code;
+var 
+    code: intermediate_code;
+begin
+    code := newCode('CALL', 'READ', salvo, 'NONE', '');
+    Exit(code);
+end;
+
+function genCALL_WRITE(escrito: string): intermediate_code;
+var 
+    code: intermediate_code;
+begin
+    code := newCode('CALL', 'WRITE', escrito, 'NONE', '');
+    Exit(code);
+end;
+
+function genOR(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
+begin
+    code := newCode('OR', salvo, op1, op2, '');
+    Exit(code);
+end;
+
+function genAND(salvo, op1, op2: string): intermediate_code;
+var 
+    code: intermediate_code;
+begin
+    code := newCode('AND', salvo, op1, op2, '');
+    Exit(code);
+end;
+
+function genNOT(salvo, op1: string): intermediate_code;
+var 
+    code: intermediate_code;
+begin
+    code := newCode('NOT', salvo, op1, 'NONE', '');
+    Exit(code);
+end;
+
+procedure printArrayCode(arrayCode: intermediate_code_array);
+var 
     i: Integer;
 begin
-    writeln(#10, '=== CÓDIGO INTERMEDIÁRIO GERADO ===');
-    for i := 0 to High(codeArray) do
+    for i := 0 to High(arrayCode) do
     begin
-        with codeArray[i] do
-        begin
-            case code_type of
-                OP_ASSIGN: writeln('ASSIGN ', op1, ' := ', op2, ' (Type: ', op_type, ')');
-                OP_ADD:    writeln('ADD    ', op1, ', ', op2, ' -> ', op3);
-                OP_SUB:    writeln('SUB    ', op1, ', ', op2, ' -> ', op3);
-                OP_MUL:    writeln('MUL    ', op1, ', ', op2, ' -> ', op3);
-                OP_LABEL:  writeln('LABEL  ', op1);
-                OP_IF:     writeln('IF     ', op1, ' THEN GOTO ', op2, ' ELSE GOTO ', op3);
-                OP_JUMP:   writeln('JUMP   ', op3);
-                else       writeln(code_type, ' ', op1, ', ', op2, ', ', op3, ' (Type: ', op_type, ')');
-            end;
-        end;
+        write('Code Type: ', arrayCode[i].code_type, ' | ');
+        write('Op1: ', arrayCode[i].op1, ' | ');
+        write('Op2: ', arrayCode[i].op2, ' | ');
+        write('Op3: ', arrayCode[i].op3, ' | ');
+        writeln('Op Type: ', arrayCode[i].op_type); 
     end;
-    writeln('=================================', #10);
+end;
+
+procedure addIntermediateCode(var arrayCode: intermediate_code_array; code: intermediate_code);
+begin
+    SetLength(arrayCode, Length(arrayCode) + 1);
+    arrayCode[High(arrayCode)] := code;
+end;
+
+procedure updateIntermediateCode(var arrayCode: intermediate_code_array; i: Integer; valor: string; opType: string);
+begin
+    if (i >= 0) and (i < Length(arrayCode)) then
+    begin
+        arrayCode[i].op2 := valor;
+        arrayCode[i].op_type := opType;
+    end
+end;
+
+function genNewTemp(var flagNewTemp: Integer): string;
+var
+    str: string;
+begin
+    Inc(flagNewTemp);
+    str := 'TEMP' + IntToStr(flagNewTemp);
+    Exit(str);
 end;
 
 end.
