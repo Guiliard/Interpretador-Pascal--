@@ -331,12 +331,8 @@ begin
 end;
 
 procedure procAtrib(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
-var 
-    code: intermediate_code;
 begin
     eatToken(lexemes, i, type_token_unit._VARIABLE_);
-    code := genATT(lexemes[i-1].lex_text, '');
-    addIntermediateCode(arrayCode, code);
     eatToken(lexemes, i, type_token_unit._ASSIGN_);
     procExpr(lexemes, i, arrayCode);
 end;
@@ -377,8 +373,6 @@ begin
     if lexemes[i].token_real = type_token_unit._AND_ then
     begin
         eatToken(lexemes, i, type_token_unit._AND_);
-        code := genAND(genNewTemp(flagNewTemp), lexemes[i-2].lex_text, lexemes[i].lex_text);
-        addIntermediateCode(arrayCode, code);
         procNot(lexemes, i, arrayCode);
         procRestAnd(lexemes, i, arrayCode);
     end;
