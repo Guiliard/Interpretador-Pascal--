@@ -112,11 +112,11 @@ begin
     if (line <> '') and (line[1] = '(') then 
     begin
         Delete(line, 1, 1);
-    end
+    end;
     if (line <> '') and (line[Length(line)] = ')') then 
     begin
         Delete(line, Length(line), 1);
-    end
+    end;
 
     p := 1;
     token := '';
@@ -154,12 +154,12 @@ begin
     if (p <= 4) and (token <> '') then
     begin
         raw_parts[p] := Trim(token);
-    end
+    end;
 
     for i := 1 to 4 do
     begin
         parts[i] := raw_parts[i];
-    end
+    end;
 
     splitLine.arg_type := 'none';
   

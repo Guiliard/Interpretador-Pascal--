@@ -1,3 +1,6 @@
+unit itm_reader;
+
+interface
 
 function readItmFile: AnsiString;
 

@@ -299,6 +299,29 @@ begin
              FindInFloatArray(farr, varName, dummyFloat));
 end;
 
+function ForceKeyboardRead(prompt: string): string;
+var
+  tmp : string;
+begin
+  // Tenta métodos alternativos em ordem
+  {$IFDEF WINDOWS}
+  Assign(Output, 'CON');
+  Rewrite(Output);
+  Assign(Input, 'CON');
+  Reset(Input);
+  {$ELSE}
+  Assign(Output, '/dev/tty');
+  Rewrite(Output);
+  Assign(Input, '/dev/tty');
+  Reset(Input);
+  {$ENDIF}
+  
+  Write(prompt);
+  ReadLn(tmp);
+  Exit(tmp);
+end;
+
+
 procedure RunInstructions(arr: ItmArray);
 var
   i: LongInt;
@@ -342,10 +365,8 @@ begin
     instr := arr[i];
     // WriteLn('Running Instruction ', i, ': ', instr.op);
     
-    if instr.op = 'ATT' then
+    if instr.op = 'ASSIGN' then
     begin
-      if VariableExists(instr.arg1, sarr, iarr, farr) then
-        ErrorAndExit('Variável já existe: ' + instr.arg1);
 
       varType := FindVariableType(instr.arg1, sarr, iarr, farr, barr);
       
@@ -1050,13 +1071,12 @@ begin
             ErrorAndExit('Tipo de variável desconhecido: ' + varType);
         end
       end
-      else if instr.arg1 = 'READ' then
+      else if (instr.arg1 = 'READ') or (instr.arg1 = 'READLN') then
       begin
         varType := FindVariableType(instr.arg2, sarr, iarr, farr, barr);
-        tempStr := ''; // Variável temporária para leitura
-          
-        // Ler a entrada do usuário
-        read(tempStr);
+        tempStr := '';
+        
+        tempStr := ForceKeyboardRead('Digite o valor para ' + instr.arg2 + ': ');
           
         if varType = 'string' then
         begin
