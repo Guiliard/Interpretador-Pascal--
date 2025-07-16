@@ -6,6 +6,7 @@ begin
     x := 10;
     y := 1;
     s := "Olá, mundo!";
+    x := x + 1;
     if x > y then
         writeln("X é maior que Y");
     // Comentário de uma linha
