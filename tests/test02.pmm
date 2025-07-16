@@ -6,7 +6,7 @@ var
     str: string;
 begin
     // Aritmética básica
-    num1 := (10 + 3) * 4 div 2 mod 5;
+    num1 := (10 + 3) * (4 + 3) div (2 * 5) mod 5;
     num2 := 12.5;
     hexa := 0x1F3;
     str  := "String";

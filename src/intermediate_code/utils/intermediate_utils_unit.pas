@@ -26,7 +26,7 @@ function genIDIV(salvo, op1, op2: string): intermediate_code;
 function genMOD(salvo, op1, op2: string): intermediate_code;
 
 function genCALL_READ(salvo: string): intermediate_code;
-function genCALL_WRITE(escrito: string): intermediate_code;
+function genCALL_WRITE(escrito, tipo: string): intermediate_code;
 
 function genOR(salvo, op1, op2: string): intermediate_code;
 function genAND(salvo, op1, op2: string): intermediate_code;
@@ -37,6 +37,7 @@ procedure addIntermediateCode(var arrayCode: intermediate_code_array; code: inte
 procedure updateIntermediateCode(var arrayCode: intermediate_code_array; i: Integer; valor: string; opType: string);
 
 function genNewTemp(var flagNewTemp: Integer): string;
+function isTemp(codeTemp: string): boolean;
 
 implementation
 
@@ -188,11 +189,11 @@ begin
     Exit(code);
 end;
 
-function genCALL_WRITE(escrito: string): intermediate_code;
+function genCALL_WRITE(escrito, tipo: string): intermediate_code;
 var 
     code: intermediate_code;
 begin
-    code := newCode('CALL', 'WRITE', escrito, 'NONE', '');
+    code := newCode('CALL', 'WRITE', escrito, 'NONE', tipo);
     Exit(code);
 end;
 
@@ -257,5 +258,22 @@ begin
     str := 'TEMP' + IntToStr(flagNewTemp);
     Exit(str);
 end;
+
+function isTemp(codeTemp: string): boolean;
+var
+    prefix: string;
+    isEqual: boolean;
+    i: Integer;
+begin
+    prefix := 'TEMP';
+    isEqual := true;
+    for i := 1 to 4 do
+    begin
+        if codeTemp[i] <> prefix[i] then
+            isEqual := False;
+    end;
+    Exit(isEqual);
+end;
+
 
 end.

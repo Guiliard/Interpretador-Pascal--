@@ -258,12 +258,18 @@ begin
 end;
 
 procedure procIoStmt(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
+var
+    token: string;
+    code: intermediate_code;
 begin
     if lexemes[i].token_real in [type_token_unit._READ_, type_token_unit._READLN_] then
     begin
         eatToken(lexemes, i, lexemes[i].token_real);
         eatToken(lexemes, i, type_token_unit._LEFT_PAREN_);
+        token := lexemes[i].lex_text;
         eatToken(lexemes, i, type_token_unit._VARIABLE_);
+        code := genCALL_READ(token);
+        addIntermediateCode(arrayCode, code);
         eatToken(lexemes, i, type_token_unit._RIGHT_PAREN_);
         eatToken(lexemes, i, type_token_unit._SEMICOLON_);
     end
@@ -285,8 +291,6 @@ begin
 end;
 
 procedure procRestOutList(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
-var 
-    code: intermediate_code;
 begin
     if lexemes[i].token_real = type_token_unit._COMMA_ then
     begin
@@ -296,9 +300,20 @@ begin
 end;
 
 procedure procOut(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
+var 
+    code: intermediate_code;
 begin
     if lexemes[i].token_real in [type_token_unit._STRING_LITERAL_, type_token_unit._VARIABLE_, type_token_unit._DECIMAL_, type_token_unit._FLOAT_] then
     begin
+        if lexemes[i].token_real = _VARIABLE_ then
+        begin
+            code := genCALL_WRITE(lexemes[i].lex_text, 'var');
+        end
+        else
+        begin
+            code := genCALL_WRITE(lexemes[i].lex_text, 'string');
+        end;
+        addIntermediateCode(arrayCode, code);
         eatToken(lexemes, i, lexemes[i].token_real);
     end;
 end;
@@ -349,6 +364,11 @@ var
     token: string;
 begin
     token := procAnd(lexemes, i, arrayCode);
+    if (token = 'vazio') then
+    begin 
+        flagNewTemp := flagNewTemp - 1;
+        token := genNewTemp(flagNewTemp);
+    end;
     procRestOr(lexemes, i, arrayCode, token);
 end;
 
@@ -361,6 +381,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._OR_);
         otherToken := procAnd(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then 
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genOR(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
         procRestOr(lexemes, i, arrayCode, token);
@@ -413,6 +438,11 @@ var
     token: string;
 begin
     token := procAdd(lexemes, i, arrayCode);
+    if (token = 'vazio') then
+    begin
+        flagNewTemp := flagNewTemp - 1;
+        token := genNewTemp(flagNewTemp);
+    end;
     procRestRel(lexemes, i, arrayCode, token);
     Exit(token);
 end;
@@ -426,6 +456,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._EQUAL_);
         otherToken := procAdd(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genEQ(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
     end
@@ -435,6 +470,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._NOT_EQUAL_);
         otherToken := procAdd(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genNEQ(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
     end
@@ -444,6 +484,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._LOWER_);
         otherToken := procAdd(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genLESS(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
     end
@@ -452,6 +497,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._LOWER_EQUAL_);
         otherToken := procAdd(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genLEQ(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
     end
@@ -459,6 +509,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._GREATER_);
         otherToken := procAdd(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genGRET(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
     end
@@ -466,6 +521,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._GREATER_EQUAL_);
         otherToken := procAdd(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genGEQ(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
     end;
@@ -476,6 +536,11 @@ var
     token: string;
 begin
     token := procMult(lexemes, i, arrayCode);
+    if (token = 'vazio') then
+    begin
+        flagNewTemp := flagNewTemp - 1;
+        token := genNewTemp(flagNewTemp);
+    end;
     procRestAdd(lexemes, i, arrayCode, token);
     Exit(token);
 end;
@@ -489,6 +554,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._ADD_);
         otherToken := procMult(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genADD(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
         procRestAdd(lexemes, i, arrayCode, token);
@@ -498,6 +568,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._SUB_);
         otherToken := procMult(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genSUB(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
         procRestAdd(lexemes, i, arrayCode, token);
@@ -509,6 +584,11 @@ var
     token: string;
 begin
     token := procUno(lexemes, i, arrayCode);
+    if (token = 'vazio') then 
+    begin
+        flagNewTemp := flagNewTemp - 1;
+        token := genNewTemp(flagNewTemp);
+    end;
     procRestMult(lexemes, i, arrayCode, token);
     Exit(token);
 end;
@@ -522,6 +602,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._MUL_);
         otherToken := procUno(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genMULT(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
         procRestMult(lexemes, i, arrayCode, token);
@@ -531,6 +616,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._REAL_DIV_);
         otherToken := procUno(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genRDIV(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
         procRestMult(lexemes, i, arrayCode, token);
@@ -540,6 +630,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._MOD_);
         otherToken := procUno(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genMOD(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
         procRestMult(lexemes, i, arrayCode, token);
@@ -549,6 +644,11 @@ begin
     begin
         eatToken(lexemes, i, type_token_unit._INTER_DIV_);
         otherToken := procUno(lexemes, i, arrayCode);
+        if (otherToken = 'vazio') then
+        begin
+            flagNewTemp := flagNewTemp - 1;
+            otherToken := genNewTemp(flagNewTemp);
+        end;
         code := genIDIV(genNewTemp(flagNewTemp), token, otherToken);
         addIntermediateCode(arrayCode, code);
         procRestMult(lexemes, i, arrayCode, token);
@@ -577,6 +677,7 @@ const
 var
     token: string;
 begin
+    token := 'vazio';
     if lexemes[i].token_real = type_token_unit._LEFT_PAREN_ then
     begin
         eatToken(lexemes, i, type_token_unit._LEFT_PAREN_);
