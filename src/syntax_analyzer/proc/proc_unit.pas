@@ -37,11 +37,11 @@ procedure procRestAnd(lexemes: lexeme_array; var i: integer; var arrayCode: inte
 procedure procRel(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
 procedure procAdd(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
 procedure procRestRel(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
-procedure procMult(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
-procedure procRestAdd(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
-procedure procUno(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
+function procMult(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array): string;
+procedure procRestAdd(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array; token: string);
+function procUno(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array): string;
 procedure procRestMult(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
-procedure procFactor(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
+function procFactor(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array): string;
 
 implementation
 
@@ -331,10 +331,13 @@ begin
 end;
 
 procedure procAtrib(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
+var
+    code: intermediate_code;
 begin
     eatToken(lexemes, i, type_token_unit._VARIABLE_);
     eatToken(lexemes, i, type_token_unit._ASSIGN_);
     procExpr(lexemes, i, arrayCode);
+    code := genATT(lexemes[i-2].lex_text, 'VALOR DO PROCEXPR');
 end;
 
 procedure procExpr(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
@@ -440,35 +443,44 @@ begin
 end;
 
 procedure procAdd(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
+var 
+    token: string;
 begin
-    procMult(lexemes, i, arrayCode);
-    procRestAdd(lexemes, i, arrayCode);
+    token := procMult(lexemes, i, arrayCode);
+    procRestAdd(lexemes, i, arrayCode, token);
 end;
 
-procedure procRestAdd(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
+procedure procRestAdd(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array; token: string);
 var 
     code: intermediate_code;
-
+    otherToken: string;
 begin
     if lexemes[i].token_real = type_token_unit._ADD_ then
     begin
         eatToken(lexemes, i, type_token_unit._ADD_);
-        procMult(lexemes, i, arrayCode);
-        procRestAdd(lexemes, i, arrayCode);
+        otherToken := procMult(lexemes, i, arrayCode);
+        code := genADD(genNewTemp(flagNewTemp), token, otherToken);
+        addIntermediateCode(arrayCode, code);
+        procRestAdd(lexemes, i, arrayCode, token);
     end
     else
     if lexemes[i].token_real = type_token_unit._SUB_ then
     begin
         eatToken(lexemes, i, type_token_unit._SUB_);
-        procMult(lexemes, i, arrayCode);
-        procRestAdd(lexemes, i, arrayCode);
+        otherToken := procMult(lexemes, i, arrayCode);
+        code := genSUB(genNewTemp(flagNewTemp), token, otherToken);
+        addIntermediateCode(arrayCode, code);
+        procRestAdd(lexemes, i, arrayCode, token);
     end;
 end;
 
-procedure procMult(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
+function procMult(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array): string;
+var 
+    token: string;
 begin
-    procUno(lexemes, i, arrayCode);
+    token := procUno(lexemes, i, arrayCode);
     procRestMult(lexemes, i, arrayCode);
+    Exit(token);
 end;
 
 procedure procRestMult(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
@@ -504,7 +516,9 @@ begin
     end;
 end;
 
-procedure procUno(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
+function procUno(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array): string;
+var
+    token: string;
 begin
     if lexemes[i].token_real in [type_token_unit._ADD_, type_token_unit._SUB_] then
     begin
@@ -513,13 +527,16 @@ begin
     end
     else
     begin
-        procFactor(lexemes, i, arrayCode);
+        token := procFactor(lexemes, i, arrayCode);
     end;
+    Exit(token);
 end;
 
-procedure procFactor(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array);
+function procFactor(lexemes: lexeme_array; var i: integer; var arrayCode: intermediate_code_array): string;
 const
     factorSet: set of typeToken = [_STRING_LITERAL_, _VARIABLE_, _DECIMAL_, _FLOAT_, _HEXADECIMAL_, _OCTAL_];
+var
+    token: string;
 begin
     if lexemes[i].token_real = type_token_unit._LEFT_PAREN_ then
     begin
@@ -530,6 +547,7 @@ begin
     else
     if lexemes[i].token_real in factorSet then
     begin
+        token := lexemes[i].lex_text;
         eatToken(lexemes, i, lexemes[i].token_real);
     end
     else
@@ -538,6 +556,7 @@ begin
         writeln('The token: "', lexemes[i].lex_text, '" is a ', lexemes[i].token_real, ' type.', ' It should be a _STRING_LITERAL_, _VARIABLE_, _DECIMAL_, _FLOAT_, _HEXADECIMAL_ or _OCTAL_ type.', #10);
         Halt(1);
     end;
+    Exit(token);
 end;
 
 end.
